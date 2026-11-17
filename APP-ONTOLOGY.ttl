@@ -1,0 +1,348 @@
+@prefix tax:   <https://stardog.com/taxonomy/vocab#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix dct:   <http://purl.org/dc/terms/> .
+
+#################################################################
+# Taxonomy Manager App Ontology
+#
+# This file describes the app's OWN bookkeeping vocabulary — the classes
+# and properties Taxonomy Manager itself reads and writes in order to
+# operate (config, audit, review workflow, tagging, data loads, releases,
+# discussion). It is never a customer's subject-matter ontology: nothing
+# here is written into, or expected to already exist in, an imported
+# vocabulary's own SKOS/OWL content. See APP-ONTOLOGY.md for the named-
+# graph map, worked trig examples, and a plain-language walkthrough.
+#
+# `tax:` = https://stardog.com/taxonomy/vocab# is this app's own
+# namespace and is stable across installs.
+#
+# `ex:` = https://taxonomy.example.org/id/ is a DIFFERENT thing and is
+# deliberately not modelled below: it is the placeholder base an
+# install mints its own new IRIs from (new schemes, new concepts, audit
+# events, comments, reviews, tags — see mintIri()/URI templates) until a
+# taxonomy admin sets a real one under Identifier patterns. It carries no
+# classes or properties of its own — it is a namespace an admin is
+# expected to replace, not a vocabulary to extend. Never written into
+# anything imported: import preserves a source file's own IRIs verbatim.
+#################################################################
+
+<https://stardog.com/taxonomy/vocab#> a owl:Ontology ;
+  rdfs:label "Taxonomy Manager App Ontology" ;
+  rdfs:comment "The application-bookkeeping vocabulary Taxonomy Manager reads and writes for its own operation, independent of any imported subject-matter data." .
+
+#################################################################
+# Classes
+#################################################################
+
+tax:TaxonomyAppConfig a owl:Class ;
+  rdfs:label "App config" ;
+  rdfs:comment "The single admin-decisions resource in urn:taxonomy:app:config — URI templates, active/default/required languages, the app's own installation identity." .
+
+tax:AuditEvent a owl:Class ;
+  rdfs:label "Audit event" ;
+  rdfs:comment "One entry in the change log (urn:taxonomy:app:audit). Also typed prov:Activity. Written in the same transaction as the data change it records — never one without the other." .
+
+tax:RelationType a owl:Class ;
+  rdfs:label "Relation type" ;
+  rdfs:comment "A custom, registered semantic relation beyond SKOS's own broader/narrower/related — declared as a real rdf:Property, subPropertyOf skos:semanticRelation." .
+
+tax:Mapping a owl:Class ;
+  rdfs:label "Mapping" ;
+  rdfs:comment "A proposed or decided cross-scheme correspondence (skos:exactMatch/closeMatch/etc.) going through this app's review workflow." .
+
+tax:TagCorpus a owl:Class ;
+  rdfs:label "Tag corpus" ;
+  rdfs:comment "A registered external content database this app can apply concepts to — a target database/graph/endpoint the tagging feature knows about." .
+
+tax:Tag a owl:Class ;
+  rdfs:label "Tag" ;
+  rdfs:comment "One application of a concept to a piece of external content in a TagCorpus, with a method and confidence." .
+
+tax:DataLoad a owl:Class ;
+  rdfs:label "Data load" ;
+  rdfs:comment "One register entry in urn:taxonomy:app:loads for a file loaded straight into the database — what arrived, and what became of it (loaded, incorporated, discarded)." .
+
+tax:Release a owl:Class ;
+  rdfs:label "Release" ;
+  rdfs:comment "One immutable published snapshot of a scheme, recording what changed since the previous release." .
+
+tax:ReviewRequest a owl:Class ;
+  rdfs:label "Review request" ;
+  rdfs:comment "A request for a reviewer to approve or reject one pending change, in urn:taxonomy:app:reviews." .
+
+tax:Discussion a owl:Class ;
+  rdfs:label "Discussion" ;
+  rdfs:comment "One editorial discussion thread on a concept, in urn:taxonomy:app:comments — deliberately not stored in the vocabulary graph itself; see APP-ONTOLOGY.md." .
+
+tax:Comment a owl:Class ;
+  rdfs:label "Comment" ;
+  rdfs:comment "One reply within a Discussion thread." .
+
+tax:RetiredIdentifier a owl:Class ;
+  rdfs:label "Retired identifier" ;
+  rdfs:comment "Marks a concept URI that was merged into another and kept resolving via dct:isReplacedBy, rather than deleted." .
+
+tax:AppGraph a owl:Class ;
+  rdfs:label "App graph" ;
+  rdfs:comment "Self-description marker: this named graph is one of Taxonomy Manager's own bookkeeping graphs, not part of a customer's data model." .
+
+#################################################################
+# Properties — audit (domain tax:AuditEvent; see ARCHITECTURE.md §6)
+#################################################################
+
+tax:action a owl:ObjectProperty ; rdfs:domain tax:AuditEvent ;
+  rdfs:label "action" ;
+  rdfs:comment "What kind of change this event records, e.g. tax:AddProperty, tax:EditProperty, tax:MoveConceptScheme, tax:EditRawTriples — an open, dynamically-named enumeration: one individual per distinct action this app's code names, not a fixed closed list." .
+
+tax:outcome a owl:ObjectProperty ; rdfs:domain tax:AuditEvent ;
+  rdfs:label "outcome" ;
+  rdfs:comment "Always tax:Committed today — every audit event this app writes describes a transaction that succeeded, since a refused write never reaches the point of building one." .
+
+tax:targetGraph a owl:ObjectProperty ;
+  rdfs:label "target graph" ;
+  rdfs:comment "The named graph a change, load, tag corpus, review, or discussion targets. Used across several classes (AuditEvent, DataLoad, TagCorpus, ReviewRequest, Discussion) rather than one — no single rdfs:domain fits." .
+
+tax:targetDatabase a owl:DatatypeProperty ; rdfs:domain tax:AuditEvent ; rdfs:range xsd:string ;
+  rdfs:label "target database" ;
+  rdfs:comment "The Stardog database an audit event's write actually targeted, as a plain string (not an IRI — a database name, not a resource this graph can dereference). Defaults to the currently open database; differs only for a creation modal's cross-database destination-picker escape hatch. Every audit event carries this, added 2026-09-09." .
+
+tax:subject a owl:ObjectProperty ;
+  rdfs:label "subject" ;
+  rdfs:comment "The resource an audit event is about, or (on the Tag/bulk-retarget shapes below) reused loosely for the same idea — see tax:concept for the more specific Tag-domain property." .
+
+tax:property a rdf:Property ; rdfs:domain tax:AuditEvent ; rdfs:range rdf:Property ;
+  rdfs:label "property" ;
+  rdfs:comment "The predicate an audit event's change was made to." .
+
+tax:oldValue a rdf:Property ; rdfs:domain tax:AuditEvent ;
+  rdfs:label "old value" ; rdfs:comment "The value before this event's change, of whatever RDF term type it was." .
+
+tax:newValue a rdf:Property ; rdfs:domain tax:AuditEvent ;
+  rdfs:label "new value" ; rdfs:comment "The value after this event's change." .
+
+tax:rationale a owl:DatatypeProperty ; rdfs:range xsd:string ;
+  rdfs:label "rationale" ;
+  rdfs:comment "A free-text note. Required on a manual URI edit. Also where a change that does not fit AuditEvent's single old/new-value shape — a raw-RDF multi-triple edit, a manual SPARQL update — is summarised (\"3 removed, 2 added\"), rather than left unrecorded." .
+
+tax:graphRevision a owl:DatatypeProperty ; rdfs:domain tax:AuditEvent ; rdfs:range xsd:integer ;
+  rdfs:label "graph revision" ;
+  rdfs:comment "The target graph's revision counter (see tax:revision) immediately after this event committed." .
+
+#################################################################
+# Properties — concurrency (ARCHITECTURE.md §5)
+#################################################################
+
+tax:revision a owl:DatatypeProperty ; rdfs:range xsd:integer ;
+  rdfs:label "revision" ;
+  rdfs:comment "A per-graph counter in urn:taxonomy:app:sessions, incremented by every committed mutation — the optimistic-concurrency check a guarded write's WHERE clause can additionally assert against." .
+
+#################################################################
+# Properties — lifecycle and workflow status (open enumerations)
+#
+# tax:lifecycleStatus, tax:status, tax:reviewState and tax:threadState are
+# deliberately four separate properties rather than one shared "status":
+# a concept's editorial lifecycle (draft/approved/...), a mapping/tag/
+# data-load's own state, a review request's decision, and a discussion
+# thread's open/closed state are different vocabularies that happen to
+# shape the same way, not the same fact asked four times.
+#################################################################
+
+tax:lifecycleStatus a owl:ObjectProperty ; rdfs:domain skos:Concept ;
+  rdfs:label "lifecycle status" ;
+  rdfs:comment "A concept's editorial state (e.g. draft, approved, deprecated) — FR-7." .
+
+tax:status a owl:ObjectProperty ;
+  rdfs:label "status" ;
+  rdfs:comment "General-purpose workflow status, shared by Tag, Mapping-adjacent bulk-retarget records, and DataLoad — values include tax:Active, tax:NeedsReview, tax:Loaded, tax:Incorporated, tax:Discarded. Same open-enumeration pattern as tax:action." .
+
+tax:mappingStatus a owl:ObjectProperty ; rdfs:domain tax:Mapping ;
+  rdfs:label "mapping status" ; rdfs:comment "A Mapping's own review-workflow state, distinct from the general tax:status." .
+
+tax:reviewState a owl:ObjectProperty ; rdfs:domain tax:ReviewRequest ;
+  rdfs:label "review state" ; rdfs:comment "A ReviewRequest's own decision state." .
+
+tax:threadState a owl:ObjectProperty ; rdfs:domain tax:Discussion ;
+  rdfs:label "thread state" ; rdfs:comment "A Discussion's open/closed state." .
+
+tax:needsPlacement a owl:DatatypeProperty ; rdfs:domain skos:Concept ; rdfs:range xsd:boolean ;
+  rdfs:label "needs placement" ;
+  rdfs:comment "Set on a concept a bulk-import placement rule could not place under any broader term automatically — a visible backlog, never a silent guess." .
+
+tax:retargetedFrom a rdf:Property ;
+  rdfs:label "retargeted from" ;
+  rdfs:comment "On a Tag or Mapping caught up in a bulk retarget, the resource it used to point at before the retarget ran." .
+
+tax:reviewReason a owl:DatatypeProperty ; rdfs:range xsd:string ;
+  rdfs:label "review reason" ;
+  rdfs:comment "Why a bulk-changed Tag or Mapping was flagged tax:NeedsReview instead of applied outright." .
+
+#################################################################
+# Properties — URI minting (domain: the app-config resource; ARCHITECTURE.md §10)
+#################################################################
+
+tax:uriBase a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "URI base" ; rdfs:comment "The {base} token's value — the namespace root new IRIs are minted under." .
+
+tax:uriDomain a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "URI domain" ; rdfs:comment "The {domain} token's value — an arbitrary project/tenant label an admin chooses, not derived from any data." .
+
+tax:uriVersionToken a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "URI version token" ; rdfs:comment "The {version} token's value, blank unless an install deliberately versions its URIs (rarely correct for concept URIs — see the in-app warning)." .
+
+tax:uriLocalIdStrategy a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ;
+  rdfs:label "instance identifier strategy" ;
+  rdfs:comment "How the {localId} token (labelled \"instance identifier\" in the UI) is generated when something new is minted: slug, ULID, or UUID v4." .
+
+tax:uriTemplate a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "default URI pattern" ;
+  rdfs:comment "The default {token}-and-literal-text pattern, used when no more specific per-class or per-scheme override applies." .
+
+tax:uriTemplateFor a owl:ObjectProperty ; rdfs:domain tax:TaxonomyAppConfig ;
+  rdfs:label "URI pattern override" ;
+  rdfs:comment "One per-class URI pattern override, pointing at a fixed, deterministic <tax:uriTemplateFor/{class}> resource rather than a blank node — fixed 2026-09-04 (was written as an anonymous [ tax:forClass ... ; tax:pattern ... ] node, which conflicted with this project's own no-blank-node rule and left old overrides orphaned on every save; the save handler now deletes any prior override resource's own triples before inserting the new set)." .
+
+tax:forClass a owl:DatatypeProperty ; rdfs:range xsd:string ;
+  rdfs:label "for class" ; rdfs:comment "Which artifact class (concept, label, restriction, mapping, audit, release) a tax:uriTemplateFor override applies to." .
+
+tax:pattern a owl:DatatypeProperty ; rdfs:range xsd:string ;
+  rdfs:label "pattern" ; rdfs:comment "The override's own {token}-and-literal-text pattern string." .
+
+#################################################################
+# Properties — app identity and languages (domain: tax:TaxonomyAppConfig)
+#################################################################
+
+tax:appId a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "app id" ; rdfs:comment "Fixed identifying string (\"stardog-taxonomy-manager\") the readiness check looks for to confirm this app's bookkeeping graphs exist." .
+
+tax:schemaVersion a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "schema version" ; rdfs:comment "The version of this app's own bookkeeping schema a database was initialized with." .
+
+tax:initializedAt a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:dateTime ;
+  rdfs:label "initialized at" .
+tax:initializedBy a owl:ObjectProperty ; rdfs:domain tax:TaxonomyAppConfig ;
+  rdfs:label "initialized by" ; rdfs:comment "The user resource who first provisioned this app's bookkeeping graphs." .
+
+tax:defaultLanguage a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "default language" ; rdfs:comment "The fallback BCP 47 language tag when a preferred label is missing in the viewer's own language." .
+tax:activeLanguage a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "active language" ; rdfs:comment "One BCP 47 tag the UI can display — repeated, one triple per active language." .
+tax:requiredLanguage a owl:DatatypeProperty ;
+  rdfs:label "required language" ;
+  rdfs:comment "Declared per-scheme (domain: a skos:ConceptScheme resource, not the app config): a language an admin has made mandatory for that scheme's labels. Editorial policy the app reports coverage against — see CLAUDE.md's \"the app does not invent policy\" corollary — not a structural constraint the app enforces on its own judgement." .
+
+tax:rolePrefix a owl:DatatypeProperty ; rdfs:domain tax:TaxonomyAppConfig ; rdfs:range xsd:string ;
+  rdfs:label "role prefix" ; rdfs:comment "The naming prefix (e.g. \"tax\") this install's Stardog roles use, settled once on first use and never changed automatically after." .
+
+#################################################################
+# Properties — RelationType
+#################################################################
+
+tax:relOrigin a owl:DatatypeProperty ; rdfs:domain tax:RelationType ; rdfs:range xsd:string ;
+  rdfs:label "relation origin" ; rdfs:comment "\"custom\" for an admin-registered relation, or the built-in origin it came from." .
+tax:relHierarchical a owl:DatatypeProperty ; rdfs:domain tax:RelationType ; rdfs:range xsd:boolean ;
+  rdfs:label "relation is hierarchical" ; rdfs:comment "Whether this custom relation should be treated like broader/narrower for tree and validation purposes." .
+
+#################################################################
+# Properties — Mapping
+#################################################################
+
+tax:mapSource a owl:ObjectProperty ; rdfs:domain tax:Mapping ; rdfs:label "map source" .
+tax:mapPredicate a rdf:Property ; rdfs:domain tax:Mapping ; rdfs:range rdf:Property ;
+  rdfs:label "map predicate" ; rdfs:comment "Which SKOS mapping relation (exactMatch, closeMatch, ...) this Mapping proposes." .
+tax:mapTarget a owl:ObjectProperty ; rdfs:domain tax:Mapping ; rdfs:label "map target" .
+tax:mappingConfidence a owl:DatatypeProperty ; rdfs:domain tax:Mapping ; rdfs:range xsd:decimal ;
+  rdfs:label "mapping confidence" .
+tax:proposedBy a owl:ObjectProperty ; rdfs:domain tax:Mapping ; rdfs:label "proposed by" .
+tax:decidedBy a owl:ObjectProperty ;
+  rdfs:label "decided by" ; rdfs:comment "Shared by Mapping and ReviewRequest — whoever approved or rejected it." .
+tax:decidedAt a owl:DatatypeProperty ; rdfs:range xsd:dateTime ;
+  rdfs:label "decided at" ; rdfs:comment "Shared by Mapping and ReviewRequest." .
+
+#################################################################
+# Properties — TagCorpus / Tag
+#################################################################
+
+tax:corpusId a owl:DatatypeProperty ; rdfs:domain tax:TagCorpus ; rdfs:range xsd:string ; rdfs:label "corpus id" .
+tax:targetDatabase a owl:DatatypeProperty ; rdfs:range xsd:string ;
+  rdfs:label "target database" ; rdfs:comment "Shared by TagCorpus and DataLoad." .
+tax:targetEndpoint a owl:DatatypeProperty ; rdfs:domain tax:TagCorpus ; rdfs:range xsd:string ; rdfs:label "target endpoint" .
+
+tax:concept a owl:ObjectProperty ; rdfs:domain tax:Tag ; rdfs:range skos:Concept ;
+  rdfs:label "concept" ; rdfs:comment "Which concept a Tag applies." .
+tax:target a owl:ObjectProperty ; rdfs:domain tax:Tag ;
+  rdfs:label "target" ; rdfs:comment "The external content resource a Tag applies its concept to." .
+tax:dimension a owl:DatatypeProperty ; rdfs:domain tax:Tag ; rdfs:range xsd:string ;
+  rdfs:label "dimension" ; rdfs:comment "Which facet of the content this Tag classifies, for a corpus with more than one tagging axis." .
+tax:method a owl:DatatypeProperty ; rdfs:domain tax:Tag ; rdfs:range xsd:string ;
+  rdfs:label "method" ; rdfs:comment "How this Tag was produced (e.g. manual, an automated pass)." .
+tax:confidence a owl:DatatypeProperty ; rdfs:domain tax:Tag ; rdfs:range xsd:decimal ; rdfs:label "confidence" .
+
+#################################################################
+# Properties — DataLoad
+#################################################################
+
+tax:owner a owl:ObjectProperty ; rdfs:domain tax:DataLoad ; rdfs:label "owner" ; rdfs:comment "Who loaded this file." .
+tax:sourceFile a owl:DatatypeProperty ; rdfs:domain tax:DataLoad ; rdfs:range xsd:string ; rdfs:label "source file" .
+tax:sourceBytes a owl:DatatypeProperty ; rdfs:domain tax:DataLoad ; rdfs:range xsd:integer ; rdfs:label "source bytes" .
+tax:sourceFormat a owl:DatatypeProperty ; rdfs:domain tax:DataLoad ; rdfs:range xsd:string ; rdfs:label "source format" .
+tax:incorporatedInto a owl:ObjectProperty ; rdfs:domain tax:DataLoad ;
+  rdfs:label "incorporated into" ; rdfs:comment "Which vocabulary graph this load's statements were copied into, once dealt with." .
+tax:incorporatedAt a owl:DatatypeProperty ; rdfs:domain tax:DataLoad ; rdfs:range xsd:dateTime ; rdfs:label "incorporated at" .
+tax:discardedAt a owl:DatatypeProperty ; rdfs:domain tax:DataLoad ; rdfs:range xsd:dateTime ; rdfs:label "discarded at" .
+
+#################################################################
+# Properties — Release (ARCHITECTURE.md §7)
+#################################################################
+
+tax:ofScheme a owl:ObjectProperty ; rdfs:domain tax:Release ; rdfs:label "of scheme" .
+tax:scheme a owl:ObjectProperty ;
+  rdfs:label "scheme" ; rdfs:comment "Shared by Release, ReviewRequest and Discussion — which scheme this record concerns." .
+tax:version a owl:DatatypeProperty ; rdfs:domain tax:Release ; rdfs:range xsd:string ; rdfs:label "version" .
+tax:releasedAt a owl:DatatypeProperty ; rdfs:domain tax:Release ; rdfs:range xsd:dateTime ; rdfs:label "released at" .
+tax:releasedBy a owl:ObjectProperty ; rdfs:domain tax:Release ; rdfs:label "released by" .
+tax:previousRelease a owl:ObjectProperty ; rdfs:domain tax:Release ; rdfs:label "previous release" .
+tax:termsAdded a owl:DatatypeProperty ; rdfs:domain tax:Release ; rdfs:range xsd:integer ; rdfs:label "terms added" .
+tax:termsRemoved a owl:DatatypeProperty ; rdfs:domain tax:Release ; rdfs:range xsd:integer ; rdfs:label "terms removed" .
+tax:termsRenamed a owl:DatatypeProperty ; rdfs:domain tax:Release ; rdfs:range xsd:integer ; rdfs:label "terms renamed" .
+
+#################################################################
+# Properties — ReviewRequest
+#################################################################
+
+tax:requestedBy a owl:ObjectProperty ; rdfs:domain tax:ReviewRequest ; rdfs:label "requested by" .
+tax:decisionNote a owl:DatatypeProperty ; rdfs:domain tax:ReviewRequest ; rdfs:range xsd:string ; rdfs:label "decision note" .
+
+#################################################################
+# Properties — Discussion / Comment
+#################################################################
+
+tax:onConcept a owl:ObjectProperty ; rdfs:range skos:Concept ;
+  rdfs:label "on concept" ; rdfs:comment "Shared by Discussion and (via a thread) Comment — which concept a thread is about." .
+tax:inThread a owl:ObjectProperty ; rdfs:domain tax:Comment ; rdfs:range tax:Discussion ; rdfs:label "in thread" .
+tax:author a owl:ObjectProperty ; rdfs:domain tax:Comment ; rdfs:label "author" .
+tax:mentions a owl:ObjectProperty ; rdfs:domain tax:Comment ; rdfs:label "mentions" ; rdfs:comment "A user mentioned in a comment's text." .
+tax:startedBy a owl:ObjectProperty ; rdfs:domain tax:Discussion ; rdfs:label "started by" .
+tax:closedBy a owl:ObjectProperty ; rdfs:domain tax:Discussion ; rdfs:label "closed by" .
+tax:closedAt a owl:DatatypeProperty ; rdfs:domain tax:Discussion ; rdfs:range xsd:dateTime ; rdfs:label "closed at" .
+
+#################################################################
+# Properties — the bundled sample-data generator only
+#
+# These are written by this app's own demo/seed content generator (the
+# fully synthetic mock sample data and the "write this into a database" seed
+# flow) to make realistic-looking sample publications for the tagging
+# feature to demonstrate against. They are not written by any live editing
+# feature and a real install's own imported data will not carry them.
+#################################################################
+
+tax:schemeKind a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "scheme kind" .
+tax:publicationCount a owl:DatatypeProperty ; rdfs:range xsd:integer ; rdfs:label "publication count" .
+tax:sectorTerm a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "sector term" .
+tax:placementMethod a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "placement method" .
+tax:aiEnabled a owl:DatatypeProperty ; rdfs:range xsd:boolean ; rdfs:label "AI enabled" .
+tax:series a owl:DatatypeProperty ; rdfs:range xsd:string ; rdfs:label "series" .

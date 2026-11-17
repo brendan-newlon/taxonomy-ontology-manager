@@ -1,0 +1,17 @@
+{
+  "name": "taxonomy-manager-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Playwright harness driving taxonomy_manager.html through a real browser.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "report": "playwright show-report"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

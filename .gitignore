@@ -1,0 +1,23 @@
+# Local scratch
+_temp/
+_scratch/
+*.local.html
+
+# Connection profiles may contain credentials
+*connections*.yaml
+*profiles*.yaml
+*PROFILES*.yaml
+*credentials*
+.env
+.env.*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Test harness — installed dependencies and per-run output
+tests/node_modules/
+tests/test-results/
+tests/playwright-report/
