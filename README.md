@@ -8,7 +8,8 @@ credentials, and every read and write executes as you, under Stardog's RBAC.
 ## Run it
 
 Open `taxonomy_manager.html` in a browser. Click **Open demo with mock data** to
-explore without a server. The demo carries an entirely synthetic subject
+explore without a server or [click here](https://brendan-newlon.github.io/taxonomy-ontology-manager/) to access the live app online. 
+The demo carries an entirely synthetic subject
 facet — a few hundred generated terms across 30 invented sectors, a set of
 publication series and document categories — modelled as four separate
 concept schemes, plus a small curated Spanish/Portuguese/Guaraní thesaurus
