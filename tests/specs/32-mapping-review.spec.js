@@ -14,7 +14,7 @@ const A = require("../helpers/app");
  * the reason kept either way.
  */
 
-const SOURCE = A.sdg("bosques");
+const SOURCE = A.sdg("forests");
 const TARGET = "http://aims.fao.org/aos/agrovoc/c_99999";
 
 const mappings = (page, c) => page.evaluate((x) => mappingsOf(x), c);
@@ -47,7 +47,7 @@ test.describe("Proposing a mapping", () => {
   });
 
   test("two terms mapped to the same target have two independent statuses", async ({ page }) => {
-    const other = A.sdg("bosque-tropical-humedo");
+    const other = A.sdg("tropical-rainforest");
     await propose(page, SOURCE, "exactMatch", TARGET);
     await propose(page, other, "exactMatch", TARGET);
     await page.evaluate(async ([c, t]) => Mappings.approve(c, "exactMatch", t), [SOURCE, TARGET]);
@@ -324,8 +324,8 @@ test.describe("A read-only session is offered no mapping decision", () => {
 });
 
 test.describe("A merge takes the decision with it", () => {
-  const MANGROVE = A.sdg("manglar");
-  const FORESTS = A.sdg("bosques");
+  const MANGROVE = A.sdg("mangrove");
+  const FORESTS = A.sdg("forests");
   const T = "http://example.org/other/agreed";
 
   test("the survivor's mapping keeps its record and its status", async ({ page }) => {

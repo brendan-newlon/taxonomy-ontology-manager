@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const FORESTS = A.sdg("bosques");
+const FORESTS = A.sdg("forests");
 
 /**
  * Coverage for the fifth feedback pass: Data scope (renamed, live-validated
@@ -219,7 +219,7 @@ test.describe("Usage report: explicit, batched, and its results survive closing 
     await page.evaluate(() => openUsageReport());
     await A.waitModal(page, "Usage report");
     await page.click("#urTerm");
-    await page.fill("#urTerm", "Bosques");
+    await page.fill("#urTerm", "Forests");
     await page.waitForSelector("#urTerm_list .pick-opt");
     await page.click("#urTerm_list .pick-opt");
     await page.waitForTimeout(20);

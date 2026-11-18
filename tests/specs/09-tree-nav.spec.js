@@ -1,13 +1,13 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const NATURAL = A.sdg("recursos-naturales");
-const FORESTS = A.sdg("bosques");
-const MANGROVE = A.sdg("manglar");
-const RAINFOREST = A.sdg("bosque-tropical-humedo");
-const EROSION = A.sdg("erosion-del-suelo");
+const NATURAL = A.sdg("natural-resources");
+const FORESTS = A.sdg("forests");
+const MANGROVE = A.sdg("mangrove");
+const RAINFOREST = A.sdg("tropical-rainforest");
+const EROSION = A.sdg("soil-erosion");
 
-test.describe("Tree navigation and discovery (FR-2.3, FR-9, FR-11.1)", () => {
+test.describe("Tree navigation and discovery", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("expand-all then collapse-all is a strict latch", async ({ page }) => {

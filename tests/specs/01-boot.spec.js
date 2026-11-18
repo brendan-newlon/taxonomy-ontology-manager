@@ -29,10 +29,10 @@ test.describe("Boot and orientation", () => {
 
   test("the small demo scheme has the hierarchy the fixtures describe", async ({ page }) => {
     await A.boot(page, { scheme: "plant-conservation" });
-    expect(await A.broaderOf(page, A.sdg("bosques"))).toEqual([A.sdg("recursos-naturales")]);
-    const kids = await A.narrowerOf(page, A.sdg("bosques"));
+    expect(await A.broaderOf(page, A.sdg("forests"))).toEqual([A.sdg("natural-resources")]);
+    const kids = await A.narrowerOf(page, A.sdg("forests"));
     expect(kids).toEqual(expect.arrayContaining([
-      A.sdg("bosque-tropical-humedo"), A.sdg("bosque-seco-tropical"), A.sdg("manglar")
+      A.sdg("tropical-rainforest"), A.sdg("tropical-dry-forest"), A.sdg("mangrove")
     ]));
   });
 });

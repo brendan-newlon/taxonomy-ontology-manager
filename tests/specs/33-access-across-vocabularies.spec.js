@@ -23,11 +23,11 @@ async function person(page, opts = {}) {
       sent.push({ method: r.method || "GET", path: r.path, body: r.body });
       if (r.path === "/admin/roles") return { ok: true, json: async () => ({ roles: o.roles || [] }) };
       if (/^\/admin\/permissions\/role\//.test(r.path)) return { ok: true, json: async () => ({ permissions: [] }) };
-      if (r.path === "/admin/users/marta")
+      if (r.path === "/admin/users/nadia")
         return { ok: true, json: async () => ({ enabled: true, roles: o.has || [], permissions: [] }) };
       return { ok: true, json: async () => ({}), text: async () => "{}" };
     };
-    try { await openPersonPanel("marta"); } finally { Backend.request = real; }
+    try { await openPersonPanel("nadia"); } finally { Backend.request = real; }
     window.__sent = sent;
     return sent.length;
   }, opts);
@@ -109,7 +109,7 @@ test.describe("One person, every vocabulary", () => {
     await page.click("#mOk");
     await page.waitForTimeout(200);
     expect(await saves(page)).toEqual([]);
-    expect(await A.toasts(page)).toMatch(/Nothing changed for marta/);
+    expect(await A.toasts(page)).toMatch(/Nothing changed for nadia/);
   });
 
   test("only the vocabularies you actually touched are written", async ({ page }) => {

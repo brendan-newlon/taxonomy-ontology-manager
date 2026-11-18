@@ -154,7 +154,7 @@ tax:revision a owl:DatatypeProperty ; rdfs:range xsd:integer ;
 
 tax:lifecycleStatus a owl:ObjectProperty ; rdfs:domain skos:Concept ;
   rdfs:label "lifecycle status" ;
-  rdfs:comment "A concept's editorial state (e.g. draft, approved, deprecated) — FR-7." .
+  rdfs:comment "A concept's editorial state (e.g. draft, approved, deprecated)." .
 
 tax:status a owl:ObjectProperty ;
   rdfs:label "status" ;

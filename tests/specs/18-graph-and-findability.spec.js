@@ -2,8 +2,8 @@ const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
 
-const FORESTS = A.sdg("bosques");
-const RAINFOREST = A.sdg("bosque-tropical-humedo");
+const FORESTS = A.sdg("forests");
+const RAINFOREST = A.sdg("tropical-rainforest");
 
 const gnodes = (page) => page.$$eval("#tabbody .gnode", (els) => els.map((e) => ({
   iri: e.dataset.gnode || e.dataset.gcls || null,
@@ -29,7 +29,7 @@ test.describe("The graph of what is around a concept", () => {
     const n = await gnodes(page);
     expect(n.find((x) => x.me).text).toContain("Forests");
     const iris = n.map((x) => x.iri);
-    expect(iris).toContain(A.sdg("recursos-naturales"));   // its parent
+    expect(iris).toContain(A.sdg("natural-resources"));   // its parent
     expect(iris).toContain(RAINFOREST);                    // one of its children
     expect(n.filter((x) => x.lane === "gn-broader" || x.lane === "gn-narrower").length).toBeGreaterThan(1);
   });

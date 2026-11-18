@@ -1,13 +1,13 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const FORESTS = A.sdg("bosques");
-const AQUIFER = A.sdg("acuifero");
+const FORESTS = A.sdg("forests");
+const AQUIFER = A.sdg("aquifer");
 
 const labelsOf = (page, c, kind) => page.evaluate(
   ([x, k]) => xlLabels(x, k).map((r) => r.lang + ":" + r.text), [c, kind]);
 
-test.describe("Labels and languages (FR-3)", () => {
+test.describe("Labels and languages", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("a translation is a second label on the same concept, never a second concept", async ({ page }) => {

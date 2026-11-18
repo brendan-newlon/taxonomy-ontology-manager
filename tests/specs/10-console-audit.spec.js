@@ -1,8 +1,8 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const MANGROVE = A.sdg("manglar");
-const AGRI = A.sdg("agricultura-sostenible");
+const MANGROVE = A.sdg("mangrove");
+const AGRI = A.sdg("sustainable-agriculture");
 
 /** Every channel a mutating action is required to speak on. */
 async function channels(page, since) {
@@ -60,7 +60,7 @@ test.describe("Transparency console (a product feature, not debug output)", () =
     await A.reveal(page, MANGROVE);
     await A.clickRow(page, MANGROVE);
     await A.selectTab(page, "relations");
-    await A.removeRelation(page, "broader", A.sdg("bosques"));
+    await A.removeRelation(page, "broader", A.sdg("forests"));
     const ch = await channels(page, at);
     expect(ch.audit.map((e) => e.msg).join()).toMatch(/RemoveRelation/);
     // the data change and its audit event are one transaction: one UPDATE carries both

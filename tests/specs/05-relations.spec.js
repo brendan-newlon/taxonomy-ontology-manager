@@ -3,13 +3,13 @@ const A = require("../helpers/app");
 
 const SKOS = "http://www.w3.org/2004/02/skos/core#";
 
-const MANGROVE = A.sdg("manglar");
-const FORESTS = A.sdg("bosques");
-const FRESHWATER = A.sdg("agua-dulce");
-const AGRI = A.sdg("agricultura-sostenible");
-const WATERSHED = A.sdg("cuenca-hidrografica");
+const MANGROVE = A.sdg("mangrove");
+const FORESTS = A.sdg("forests");
+const FRESHWATER = A.sdg("freshwater");
+const AGRI = A.sdg("sustainable-agriculture");
+const WATERSHED = A.sdg("watershed");
 
-test.describe("Broader / narrower / related (FR-2.1, FR-2.2)", () => {
+test.describe("Broader / narrower / related", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("Add broader from the Relations tab moves the concept, visibly", async ({ page }) => {

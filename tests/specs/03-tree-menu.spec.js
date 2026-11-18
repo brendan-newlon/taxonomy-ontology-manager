@@ -1,11 +1,11 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const FORESTS = A.sdg("bosques");
-const NATURAL = A.sdg("recursos-naturales");
-const MANGROVE = A.sdg("manglar");
+const FORESTS = A.sdg("forests");
+const NATURAL = A.sdg("natural-resources");
+const MANGROVE = A.sdg("mangrove");
 
-test.describe("Right-click menu and inline rename (FR-2.4, FR-3)", () => {
+test.describe("Right-click menu and inline rename", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("right-clicking a row opens the menu and selects that row", async ({ page }) => {

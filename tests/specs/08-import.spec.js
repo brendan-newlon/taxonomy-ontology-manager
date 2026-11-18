@@ -22,7 +22,7 @@ ex:wind-power a skos:Concept ;
   skos:broader ex:renewable-energy .
 `;
 
-test.describe("Import (FR-12)", () => {
+test.describe("Import", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("Turtle lands in the tree with its hierarchy intact", async ({ page }) => {
@@ -61,10 +61,10 @@ test.describe("Import (FR-12)", () => {
 
   test("importing does not disturb the concepts already there", async ({ page }) => {
     const rootsBefore = (await A.topConcepts(page)).slice().sort();
-    const forestsKids = (await A.narrowerOf(page, A.sdg("bosques"))).slice().sort();
+    const forestsKids = (await A.narrowerOf(page, A.sdg("forests"))).slice().sort();
     await A.importText(page, TTL, "turtle");
     expect((await A.topConcepts(page)).sort()).toEqual(expect.arrayContaining(rootsBefore));
-    expect((await A.narrowerOf(page, A.sdg("bosques"))).sort()).toEqual(forestsKids);
+    expect((await A.narrowerOf(page, A.sdg("forests"))).sort()).toEqual(forestsKids);
   });
 
   test("creating a concept after an import keeps the imported roots visible", async ({ page }) => {

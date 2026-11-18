@@ -3,13 +3,13 @@ const A = require("../helpers/app");
 
 const SKOS = "http://www.w3.org/2004/02/skos/core#";
 
-const MANGROVE = A.sdg("manglar");
-const FORESTS = A.sdg("bosques");
-const NATURAL = A.sdg("recursos-naturales");
-const FRESHWATER = A.sdg("agua-dulce");
-const AGRI = A.sdg("agricultura-sostenible");
-const AGROFOR = A.sdg("agroforesteria");
-const SHADE_COFFEE = A.sdg("cafe-de-sombra");
+const MANGROVE = A.sdg("mangrove");
+const FORESTS = A.sdg("forests");
+const NATURAL = A.sdg("natural-resources");
+const FRESHWATER = A.sdg("freshwater");
+const AGRI = A.sdg("sustainable-agriculture");
+const AGROFOR = A.sdg("agroforestry");
+const SHADE_COFFEE = A.sdg("shade-grown-coffee");
 
 /** Make sure a concept's row is on screen by opening every ancestor. */
 async function reveal(page, c) {
@@ -22,7 +22,7 @@ async function reveal(page, c) {
   }, c);
 }
 
-test.describe("Moving and re-parenting (FR-2.4)", () => {
+test.describe("Moving and re-parenting", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("dropping onto a COLLAPSED target still leaves the moved concept on screen", async ({ page }) => {

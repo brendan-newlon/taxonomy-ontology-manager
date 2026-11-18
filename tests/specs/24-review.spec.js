@@ -1,8 +1,8 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const FORESTS = A.sdg("bosques");
-const MANGROVE = A.sdg("manglar");
+const FORESTS = A.sdg("forests");
+const MANGROVE = A.sdg("mangrove");
 
 /**
  * Review, on the shared draft.

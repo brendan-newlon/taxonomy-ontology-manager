@@ -1638,7 +1638,7 @@ function ulid() {
 }
 
 /* ---------------------------------------------------------------------
-   URI templates (FR-1.1). A template is a string of {tokens}; the active
+   URI templates. A template is a string of {tokens}; the active
    one for a given artifact class is resolved most-specific-first:
        scheme override  →  class override  →  global default
    All of it lives in urn:taxonomy:app:config, so a taxonomy admin changes URI
@@ -5960,7 +5960,7 @@ function untag(c, tagIri) {
 }
 
 /* =================================================================
-   FR-1.6 — merge, split, replace
+   Merge, split, replace
    Each one is preceded by the same impact preview, and each records a
    rationale, because these are the operations that silently break
    downstream consumers if done carelessly.
@@ -6268,7 +6268,7 @@ function flagTagsForReview(c, why) {
 }
 
 /* =================================================================
-   FR-1.2 — manual URI editing
+   Manual URI editing
    Permission-gated, uniqueness- and syntax-checked, audited, and it
    leaves a tombstone so anything already pointing at the old URI still
    resolves. Changing a URI is the one edit that CAN break downstream
@@ -6575,7 +6575,7 @@ function deleteResourcePrompt(c) {
 }
 
 /* =================================================================
-   FR-11.2 — SHACL
+   SHACL
    Shapes are real SHACL triples in the scheme's shapes graph, so Stardog's
    own engine can run them and so they travel with an export. The app also
    evaluates a documented subset locally, which is what gives instant
@@ -6883,7 +6883,7 @@ function openShapes() {
 }
 
 /* =================================================================
-   FR-7.4 — the audit log as a first-class, searchable screen
+   The audit log as a first-class, searchable screen
    ================================================================= */
 function allAuditEvents() {
   const out = [];
@@ -7345,240 +7345,242 @@ function schemeDisplayTitle(schemeIriValue) {
   const rec = (State.load.schemesInGraph || []).find(s => s.iri === schemeIriValue);
   return (rec && (rec.titles[State.lang] || rec.titles.en)) || short(schemeIriValue);
 }
-
 /* [id, {pref}, {alt}, {def}, broader[], related[], extras] */
 const MOCK_CONCEPTS = [
-  ["recursos-naturales", { es: "Recursos naturales", pt: "Recursos naturais", en: "Natural resources" }, {},
+  ["natural-resources", { es: "Recursos naturales", pt: "Recursos naturais", en: "Natural resources" }, {},
     { es: "Elementos del medio ambiente aprovechables por el ser humano.", en: "Environmental elements usable by humans." }, [], []],
-  ["bosques", { es: "Bosques", pt: "Florestas", en: "Forests", gn: "Ka'aguy" },
+  ["forests", { es: "Bosques", pt: "Florestas", en: "Forests", cy: "Coedwigoedd" },
     { es: ["Masas forestales"], en: ["Woodland"] },
-    { es: "Ecosistemas dominados por árboles.", en: "Tree-dominated ecosystems." }, ["recursos-naturales"], []],
-  ["bosque-tropical-humedo", { es: "Bosque tropical húmedo", pt: "Floresta tropical úmida", en: "Tropical rainforest" },
-    { es: ["Selva húmeda", "Pluvisilva"], gn: ["Ka'aguy"] },
+    { es: "Ecosistemas dominados por árboles.", en: "Tree-dominated ecosystems." }, ["natural-resources"], []],
+  ["tropical-rainforest", { es: "Bosque tropical húmedo", pt: "Floresta tropical úmida", en: "Tropical rainforest" },
+    { es: ["Selva húmeda", "Pluvisilva"], cy: ["Coedwig law"] },
     { es: "Bosque de zonas tropicales con alta precipitación durante todo el año.", en: "Tropical forest with year-round high rainfall." },
-    ["bosques"], [], { mappings: [
+    ["forests"], [], { mappings: [
       ["exactMatch", "http://aims.fao.org/aos/agrovoc/c_7797", "0.95", "approved"],
       ["closeMatch", "http://www.eionet.europa.eu/gemet/concept/8631", "0.80", "proposed"]] }],
-  ["bosque-seco-tropical", { es: "Bosque seco tropical", pt: "Floresta tropical seca", en: "Tropical dry forest" }, {},
-    { es: "Bosque tropical con estación seca prolongada." }, ["bosques"], []],
-  ["manglar", { es: "Manglar", pt: "Manguezal", en: "Mangrove" }, { es: ["Bosque de mangle"] },
+  ["tropical-dry-forest", { es: "Bosque seco tropical", pt: "Floresta tropical seca", en: "Tropical dry forest" }, {},
+    { es: "Bosque tropical con estación seca prolongada." }, ["forests"], []],
+  ["mangrove", { es: "Manglar", pt: "Manguezal", en: "Mangrove" }, { es: ["Bosque de mangle"] },
     { es: "Ecosistema costero de árboles tolerantes a la sal.", en: "Coastal ecosystem of salt-tolerant trees." },
-    ["bosques"], ["zonas-costeras"]],
-  ["agua-dulce", { es: "Agua dulce", pt: "Água doce", en: "Freshwater", qu: "Misk'i yaku", ay: "Muxsa uma" }, {},
-    { es: "Agua con baja concentración de sales disueltas." }, ["recursos-naturales"], []],
-  ["cuenca-hidrografica", { es: "Cuenca hidrográfica", pt: "Bacia hidrográfica", en: "Watershed" },
+    ["forests"], ["coastal-zones"]],
+  ["freshwater", { es: "Agua dulce", pt: "Água doce", en: "Freshwater", cy: "Dŵr croyw", eu: "Ur gezatu" }, {},
+    { es: "Agua con baja concentración de sales disueltas." }, ["natural-resources"], []],
+  ["watershed", { es: "Cuenca hidrográfica", pt: "Bacia hidrográfica", en: "Watershed" },
     { es: ["Cuenca de drenaje"], en: ["River basin", "Catchment"] },
-    { es: "Territorio drenado por un único sistema fluvial." }, ["agua-dulce"], []],
-  ["acuifero", { es: "Acuífero", pt: "Aquífero", en: "Aquifer" }, {}, {}, ["agua-dulce"], []],
-  ["suelo", { es: "Suelo", pt: "Solo", en: "Soil" }, {}, { es: "Capa superficial de la corteza terrestre." },
-    ["recursos-naturales"], []],
-  ["erosion-del-suelo", { es: "Erosión del suelo", pt: "Erosão do solo", en: "Soil erosion" }, {},
-    { es: "Desgaste de la capa superficial del suelo." }, ["suelo", "degradacion-de-tierras"], []],
-  ["degradacion-de-tierras", { es: "Degradación de tierras", pt: "Degradação da terra", en: "Land degradation" }, {},
-    { es: "Reducción de la capacidad productiva de la tierra." }, ["suelo", "erosion-del-suelo"], []],
+    { es: "Territorio drenado por un único sistema fluvial." }, ["freshwater"], []],
+  ["aquifer", { es: "Acuífero", pt: "Aquífero", en: "Aquifer" }, {}, {}, ["freshwater"], []],
+  ["soil", { es: "Suelo", pt: "Solo", en: "Soil" }, {}, { es: "Capa superficial de la corteza terrestre." },
+    ["natural-resources"], []],
+  ["soil-erosion", { es: "Erosión del suelo", pt: "Erosão do solo", en: "Soil erosion" }, {},
+    { es: "Desgaste de la capa superficial del suelo." }, ["soil", "land-degradation"], []],
+  ["land-degradation", { es: "Degradación de tierras", pt: "Degradação da terra", en: "Land degradation" }, {},
+    { es: "Reducción de la capacidad productiva de la tierra." }, ["soil", "soil-erosion"], []],
 
-  ["agricultura-sostenible", { es: "Agricultura sostenible", pt: "Agricultura sustentável", en: "Sustainable agriculture" },
+  ["sustainable-agriculture", { es: "Agricultura sostenible", pt: "Agricultura sustentável", en: "Sustainable agriculture" },
     {}, { es: "Prácticas agrícolas que mantienen la productividad a largo plazo." }, [], []],
-  ["agroforesteria", { es: "Agroforestería", pt: "Agrossilvicultura", en: "Agroforestry" },
+  ["agroforestry", { es: "Agroforestería", pt: "Agrossilvicultura", en: "Agroforestry" },
     { es: ["Sistemas agroforestales"], en: ["Agro-forestry"] },
     { es: "Integración deliberada de árboles con cultivos o ganadería.", en: "Deliberate integration of trees with crops or livestock." },
-    ["agricultura-sostenible"], ["bosques"], { mappings: [["exactMatch", "http://aims.fao.org/aos/agrovoc/c_15102", "1.0", "approved"]] }],
-  ["agricultura-familiar", { es: "Agricultura familiar", pt: "Agricultura familiar", en: "Family farming" }, {},
-    { es: "Producción agrícola gestionada por una familia." }, ["agricultura-sostenible"], []],
-  ["cafe-de-sombra", { es: "Café de sombra", pt: "Café de sombra", en: "Shade-grown coffee" },
+    ["sustainable-agriculture"], ["forests"], { mappings: [["exactMatch", "http://aims.fao.org/aos/agrovoc/c_15102", "1.0", "approved"]] }],
+  ["smallholder-farming", { es: "Agricultura familiar", pt: "Agricultura familiar", en: "Smallholder farming" }, {},
+    { es: "Producción agrícola gestionada por una familia." }, ["sustainable-agriculture"], []],
+  ["shade-grown-coffee", { es: "Café de sombra", pt: "Café de sombra", en: "Shade-grown coffee" },
     { es: ["Café bajo sombra"] }, { es: "Cultivo de café bajo dosel arbóreo." },
-    ["agroforesteria", "agricultura-familiar"], []],
-  ["seguridad-alimentaria", { es: "Seguridad alimentaria", pt: "Segurança alimentar", en: "Food security" }, {},
-    { es: "Acceso físico y económico a alimentos suficientes y nutritivos." }, ["agricultura-sostenible"], []],
+    ["agroforestry", "smallholder-farming"], []],
+  ["food-security", { es: "Seguridad alimentaria", pt: "Segurança alimentar", en: "Food security" }, {},
+    { es: "Acceso físico y económico a alimentos suficientes y nutritivos." }, ["sustainable-agriculture"], []],
 
-  ["cambio-climatico", { es: "Cambio climático", pt: "Mudança climática", en: "Climate change" },
+  ["climate-change", { es: "Cambio climático", pt: "Mudança climática", en: "Climate change" },
     { es: ["Crisis climática"], en: ["Climate crisis"] },
     { es: "Variación del clima atribuida directa o indirectamente a la actividad humana." }, [], []],
-  ["mitigacion-climatica", { es: "Mitigación climática", pt: "Mitigação climática", en: "Climate mitigation" }, {},
-    { es: "Acciones para reducir las emisiones de gases de efecto invernadero." }, ["cambio-climatico"], []],
-  ["adaptacion-climatica", { es: "Adaptación climática", pt: "Adaptação climática", en: "Climate adaptation" }, {},
-    { es: "Ajustes para moderar daños del cambio climático." }, ["cambio-climatico"], []],
-  ["deforestacion", { es: "Deforestación", pt: "Desmatamento", en: "Deforestation" }, { pt: ["Desflorestamento"] },
-    { es: "Pérdida permanente de cobertura forestal." }, ["cambio-climatico", "bosques"], ["degradacion-de-tierras"]],
-  ["emisiones-gei", { es: "Emisiones de gases de efecto invernadero", pt: "Emissões de gases de efeito estufa", en: "Greenhouse gas emissions" },
-    { es: ["Emisiones GEI"], en: ["GHG emissions"] }, {}, ["cambio-climatico"], []],
+  ["climate-mitigation", { es: "Mitigación climática", pt: "Mitigação climática", en: "Climate mitigation" }, {},
+    { es: "Acciones para reducir las emisiones de gases de efecto invernadero." }, ["climate-change"], []],
+  ["climate-adaptation", { es: "Adaptación climática", pt: "Adaptação climática", en: "Climate adaptation" }, {},
+    { es: "Ajustes para moderar daños del cambio climático." }, ["climate-change"], []],
+  ["deforestation", { es: "Deforestación", pt: "Desmatamento", en: "Deforestation" }, { pt: ["Desflorestamento"] },
+    { es: "Pérdida permanente de cobertura forestal." }, ["climate-change", "forests"], ["land-degradation"]],
+  ["greenhouse-gas-emissions", { es: "Emisiones de gases de efecto invernadero", pt: "Emissões de gases de efeito estufa", en: "Greenhouse gas emissions" },
+    { es: ["Emisiones GEI"], en: ["GHG emissions"] }, {}, ["climate-change"], []],
 
-  ["pueblos-indigenas", { es: "Pueblos indígenas", pt: "Povos indígenas", en: "Indigenous peoples",
-      gn: "Tetã ypykue", qu: "Ñawpa llaqtakuna" }, {}, { es: "Colectivos con identidad cultural anterior a la colonización." }, [], []],
-  ["conocimiento-tradicional", { es: "Conocimiento tradicional", pt: "Conhecimento tradicional",
-      en: "Traditional knowledge", gn: "Arandu ypykue" }, {},
-    { es: "Saberes transmitidos entre generaciones dentro de una comunidad." }, ["pueblos-indigenas"], []],
-  ["territorios-indigenas", { es: "Territorios indígenas", pt: "Territórios indígenas", en: "Indigenous territories" }, {},
-    { es: "Áreas reconocidas como propiedad o uso de pueblos indígenas." }, ["pueblos-indigenas"], ["areas-protegidas"]],
-  ["consulta-previa", { es: "Consulta previa", pt: "Consulta prévia", en: "Free prior and informed consent" },
-    { en: ["FPIC"] }, {}, ["pueblos-indigenas"], []],
+  ["rural-farming-communities", { es: "Comunidades agrícolas rurales", pt: "Comunidades agrícolas rurais", en: "Rural farming communities",
+      cy: "Cymunedau ffermio gwledig" }, {}, { es: "Colectivos cuya economía y cultura dependen de la agricultura local." }, [], []],
+  ["traditional-farming-knowledge", { es: "Conocimiento agrícola tradicional", pt: "Conhecimento agrícola tradicional",
+      en: "Traditional farming knowledge", cy: "Gwybodaeth ffermio draddodiadol" }, {},
+    { es: "Saberes transmitidos entre generaciones dentro de una comunidad agrícola." }, ["rural-farming-communities"], []],
+  ["community-farmland", { es: "Tierras comunitarias", pt: "Terras comunitárias", en: "Community farmland" }, {},
+    { es: "Áreas reconocidas como propiedad o uso colectivo de una comunidad agrícola." }, ["rural-farming-communities"], ["protected-areas"]],
+  ["community-land-use-consultation", { es: "Consulta comunitaria sobre uso de la tierra", pt: "Consulta comunitária sobre uso da terra",
+      en: "Community land-use consultation" },
+    { en: ["Participatory land consultation"] }, {}, ["rural-farming-communities"], []],
 
-  ["gobernanza-ambiental", { es: "Gobernanza ambiental", pt: "Governança ambiental", en: "Environmental governance" }, {},
+  ["environmental-governance", { es: "Gobernanza ambiental", pt: "Governança ambiental", en: "Environmental governance" }, {},
     { es: "Marcos institucionales para la gestión del medio ambiente." }, [], []],
-  ["areas-protegidas", { es: "Áreas protegidas", pt: "Áreas protegidas", en: "Protected areas" },
+  ["protected-areas", { es: "Áreas protegidas", pt: "Áreas protegidas", en: "Protected areas" },
     { es: ["Espacios naturales protegidos"] }, { es: "Espacios delimitados para la conservación." },
-    ["gobernanza-ambiental"], []],
-  ["pago-servicios-ambientales", { es: "Pago por servicios ambientales", pt: "Pagamento por serviços ambientais", en: "Payment for ecosystem services" },
-    { en: ["PES"] }, { es: "Incentivos económicos por conservar servicios ecosistémicos." }, ["gobernanza-ambiental"], []],
-  ["redd-plus", { es: "REDD+", pt: "REDD+", en: "REDD+" }, {},
-    { es: "Reducción de emisiones por deforestación y degradación forestal." },
-    ["gobernanza-ambiental"], ["deforestacion"]],
-  ["zonas-costeras", { es: "Zonas costeras", pt: "Zonas costeiras", en: "Coastal zones" }, {}, {},
-    ["gobernanza-ambiental"], []],
+    ["environmental-governance"], []],
+  ["payment-for-ecosystem-services", { es: "Pago por servicios ambientales", pt: "Pagamento por serviços ambientais", en: "Payment for ecosystem services" },
+    { en: ["PES"] }, { es: "Incentivos económicos por conservar servicios ecosistémicos." }, ["environmental-governance"], []],
+  ["carbon-offset-programs", { es: "Programas de compensación de carbono", pt: "Programas de compensação de carbono", en: "Carbon offset programs" }, {},
+    { es: "Reducción de emisiones por conservación y restauración forestal." },
+    ["environmental-governance"], ["deforestation"]],
+  ["coastal-zones", { es: "Zonas costeras", pt: "Zonas costeiras", en: "Coastal zones" }, {}, {},
+    ["environmental-governance"], []],
 
   /* ---- English-first branches, deliberately left without Spanish or
          Portuguese labels so the missing-translation report and the
          language filters have something real to show. ---- */
 
-  ["economic-development", { en: "Economic development", es: "Desarrollo económico", pt: "Desenvolvimento econômico" }, {},
-    { en: "Growth, productivity and structural change in national economies." }, [], []],
-  ["fiscal-policy", { en: "Fiscal policy", es: "Política fiscal", pt: "Política fiscal" },
-    { en: ["Public finance"] }, { en: "Government decisions on taxation, spending and borrowing." },
-    ["economic-development"], []],
-  ["public-debt", { en: "Public debt", es: "Deuda pública" }, { en: ["Sovereign debt"] },
-    { en: "Obligations owed by a government to domestic and external creditors." }, ["fiscal-policy"], []],
-  ["tax-administration", { en: "Tax administration" }, { en: ["Revenue administration"] }, {},
-    ["fiscal-policy"], []],
-  ["trade-integration", { en: "Trade integration", es: "Integración comercial", pt: "Integração comercial" },
-    { en: ["Regional integration"] }, { en: "Reduction of barriers to the movement of goods and services between economies." },
-    ["economic-development"], []],
-  ["productivity", { en: "Productivity", es: "Productividad" }, { en: ["Total factor productivity", "TFP"] },
-    { en: "Output produced per unit of input." }, ["economic-development"], []],
-  ["informal-economy", { en: "Informal economy", es: "Economía informal", pt: "Economia informal" },
-    { en: ["Informality", "Informal sector"] },
-    { en: "Economic activity outside formal regulation, taxation and social protection." },
-    ["economic-development"], ["social-protection"]],
-  ["microfinance", { en: "Microfinance", es: "Microfinanzas" }, {},
-    { en: "Financial services for low-income households and micro-enterprises." },
-    ["economic-development"], ["financial-inclusion"]],
-  ["financial-inclusion", { en: "Financial inclusion", es: "Inclusión financiera", pt: "Inclusão financeira" }, {},
-    { en: "Access to affordable and useful financial products." }, ["economic-development"], []],
+  ["agricultural-economics", { en: "Agricultural economics", es: "Economía agrícola", pt: "Economia agrícola" }, {},
+    { en: "Growth, productivity and structural change in farm economies." }, [], []],
+  ["farm-subsidy-policy", { en: "Farm subsidy policy", es: "Política de subsidios agrícolas", pt: "Política de subsídios agrícolas" },
+    { en: ["Agricultural support"] }, { en: "Government decisions on taxation, spending and borrowing in support of agriculture." },
+    ["agricultural-economics"], []],
+  ["farm-debt", { en: "Farm debt", es: "Deuda agrícola" }, { en: ["Agricultural debt"] },
+    { en: "Obligations owed by farm operators to lenders." }, ["farm-subsidy-policy"], []],
+  ["agricultural-tax-administration", { en: "Agricultural tax administration" }, { en: ["Farm revenue administration"] }, {},
+    ["farm-subsidy-policy"], []],
+  ["agricultural-trade-integration", { en: "Agricultural trade integration", es: "Integración del comercio agrícola", pt: "Integração do comércio agrícola" },
+    { en: ["Regional trade integration"] }, { en: "Reduction of barriers to the movement of farm goods between economies." },
+    ["agricultural-economics"], []],
+  ["farm-productivity", { en: "Farm productivity", es: "Productividad agrícola" }, { en: ["Total factor productivity", "TFP"] },
+    { en: "Output produced per unit of farm input." }, ["agricultural-economics"], []],
+  ["informal-farm-labor", { en: "Informal farm labor", es: "Trabajo agrícola informal", pt: "Trabalho agrícola informal" },
+    { en: ["Farm informality"] },
+    { en: "Farm work outside formal regulation, taxation and social protection." },
+    ["agricultural-economics"], ["farmworker-social-protection"]],
+  ["farm-microfinance", { en: "Farm microfinance", es: "Microfinanzas agrícolas" }, {},
+    { en: "Financial services for low-income farm households and micro-enterprises." },
+    ["agricultural-economics"], ["rural-financial-inclusion"]],
+  ["rural-financial-inclusion", { en: "Rural financial inclusion", es: "Inclusión financiera rural", pt: "Inclusão financeira rural" }, {},
+    { en: "Access to affordable and useful financial products for rural households." }, ["agricultural-economics"], []],
 
-  ["social-development", { en: "Social development", es: "Desarrollo social", pt: "Desenvolvimento social" }, {},
-    { en: "Improvement of wellbeing, opportunity and equity across a population." }, [], []],
-  ["education", { en: "Education", es: "Educación", pt: "Educação" }, {},
-    { en: "Formal and non-formal learning systems." }, ["social-development"], []],
-  ["early-childhood-development", { en: "Early childhood development", es: "Desarrollo infantil temprano" },
-    { en: ["ECD"] }, { en: "Physical, cognitive and social development from birth to age eight." },
-    ["education", "health-systems"], []],
-  ["education-quality", { en: "Education quality" }, { en: ["Learning outcomes"] }, {}, ["education"], []],
-  ["health-systems", { en: "Health systems", es: "Sistemas de salud", pt: "Sistemas de saúde" }, {},
-    { en: "Institutions, people and resources that deliver health services." }, ["social-development"], []],
-  ["universal-health-coverage", { en: "Universal health coverage" }, { en: ["UHC"] }, {}, ["health-systems"], []],
-  ["gender-equality", { en: "Gender equality", es: "Igualdad de género", pt: "Igualdade de gênero" },
-    { en: ["Gender equity"] }, { en: "Equal rights, opportunities and outcomes regardless of gender." },
-    ["social-development"], ["pueblos-indigenas"]],
-  ["youth-employment", { en: "Youth employment", es: "Empleo juvenil" }, {},
-    { en: "Labour-market participation of people aged roughly 15 to 29." }, ["social-development"], []],
-  ["social-protection", { en: "Social protection", es: "Protección social", pt: "Proteção social" },
-    { en: ["Social safety nets"] }, { en: "Policies that reduce poverty and vulnerability across the life cycle." },
-    ["social-development"], []],
-  ["conditional-cash-transfers", { en: "Conditional cash transfers", es: "Transferencias monetarias condicionadas" },
-    { en: ["CCT"] }, {}, ["social-protection"], []],
-  ["poverty-reduction", { en: "Poverty reduction", es: "Reducción de la pobreza", pt: "Redução da pobreza" }, {},
-    { en: "Policies and outcomes that lower the incidence and depth of poverty." },
-    ["social-development"], ["seguridad-alimentaria"]],
-  ["migration", { en: "Migration", es: "Migración", pt: "Migração" },
-    { en: ["Human mobility"] }, { en: "Movement of people within or across national borders." },
-    ["social-development"], []],
+  ["rural-development", { en: "Rural development", es: "Desarrollo rural", pt: "Desenvolvimento rural" }, {},
+    { en: "Improvement of wellbeing, opportunity and equity across a rural population." }, [], []],
+  ["farmer-education", { en: "Farmer education", es: "Educación de agricultores", pt: "Educação de agricultores" }, {},
+    { en: "Formal and non-formal learning systems for farming communities." }, ["rural-development"], []],
+  ["rural-early-childhood-development", { en: "Rural early childhood development", es: "Desarrollo infantil temprano rural" },
+    { en: ["ECD"] }, { en: "Physical, cognitive and social development from birth to age eight, in farming communities." },
+    ["farmer-education", "rural-health-systems"], []],
+  ["farmer-education-quality", { en: "Farmer education quality" }, { en: ["Learning outcomes"] }, {}, ["farmer-education"], []],
+  ["rural-health-systems", { en: "Rural health systems", es: "Sistemas de salud rural", pt: "Sistemas de saúde rural" }, {},
+    { en: "Institutions, people and resources that deliver health services to farming communities." }, ["rural-development"], []],
+  ["universal-rural-health-coverage", { en: "Universal rural health coverage" }, { en: ["UHC"] }, {}, ["rural-health-systems"], []],
+  ["gender-equality-in-farming", { en: "Gender equality in farming", es: "Igualdad de género en la agricultura", pt: "Igualdade de gênero na agricultura" },
+    { en: ["Gender equity"] }, { en: "Equal rights, opportunities and outcomes regardless of gender, on the farm and off it." },
+    ["rural-development"], ["rural-farming-communities"]],
+  ["youth-employment-in-agriculture", { en: "Youth employment in agriculture", es: "Empleo juvenil en la agricultura" }, {},
+    { en: "Labour-market participation of people aged roughly 15 to 29 in farm work." }, ["rural-development"], []],
+  ["farmworker-social-protection", { en: "Farmworker social protection", es: "Protección social del trabajador agrícola", pt: "Proteção social do trabalhador agrícola" },
+    { en: ["Social safety nets"] }, { en: "Policies that reduce poverty and vulnerability across a farmworker's life cycle." },
+    ["rural-development"], []],
+  ["farm-conditional-cash-transfers", { en: "Farm conditional cash transfers", es: "Transferencias monetarias condicionadas al agro" },
+    { en: ["CCT"] }, {}, ["farmworker-social-protection"], []],
+  ["rural-poverty-reduction", { en: "Rural poverty reduction", es: "Reducción de la pobreza rural", pt: "Redução da pobreza rural" }, {},
+    { en: "Policies and outcomes that lower the incidence and depth of poverty in farming communities." },
+    ["rural-development"], ["food-security"]],
+  ["rural-migration", { en: "Rural migration", es: "Migración rural", pt: "Migração rural" },
+    { en: ["Seasonal labor mobility"] }, { en: "Movement of farm workers within or across regions." },
+    ["rural-development"], []],
 
-  ["infrastructure", { en: "Infrastructure", es: "Infraestructura", pt: "Infraestrutura" }, {},
-    { en: "Physical and digital systems underpinning economic activity." }, [], []],
-  ["transport-infrastructure", { en: "Transport infrastructure", es: "Infraestructura de transporte" }, {},
-    {}, ["infrastructure"], []],
-  ["urban-mobility", { en: "Urban mobility", es: "Movilidad urbana", pt: "Mobilidade urbana" },
-    { en: ["Sustainable transport"] }, { en: "Movement of people and goods within cities." },
-    ["transport-infrastructure"], ["cambio-climatico"]],
-  ["renewable-energy", { en: "Renewable energy", es: "Energía renovable", pt: "Energia renovável" },
-    { en: ["Clean energy"] }, { en: "Energy from sources replenished on a human timescale." },
-    ["infrastructure"], ["mitigacion-climatica"], { mappings: [
+  ["rural-infrastructure", { en: "Rural infrastructure", es: "Infraestructura rural", pt: "Infraestrutura rural" }, {},
+    { en: "Physical and digital systems underpinning farm activity." }, [], []],
+  ["farm-transport-infrastructure", { en: "Farm transport infrastructure", es: "Infraestructura de transporte agrícola" }, {},
+    {}, ["rural-infrastructure"], []],
+  ["rural-urban-mobility", { en: "Rural-urban mobility", es: "Movilidad rural-urbana", pt: "Mobilidade rural-urbana" },
+    { en: ["Market-access transport"] }, { en: "Movement of farm goods and people between farms and markets." },
+    ["farm-transport-infrastructure"], ["climate-change"]],
+  ["on-farm-renewable-energy", { en: "On-farm renewable energy", es: "Energía renovable en finca", pt: "Energia renovável na propriedade" },
+    { en: ["Clean energy"] }, { en: "Energy from sources replenished on a human timescale, generated on-farm." },
+    ["rural-infrastructure"], ["climate-mitigation"], { mappings: [
       ["exactMatch", "http://aims.fao.org/aos/agrovoc/c_37079", "0.9", "approved"]] }],
-  ["energy-transition", { en: "Energy transition", es: "Transición energética" }, {},
-    { en: "Structural shift of an energy system away from fossil fuels." },
-    ["infrastructure"], ["renewable-energy"]],
-  ["water-and-sanitation", { en: "Water and sanitation", es: "Agua y saneamiento", pt: "Água e saneamento" },
-    { en: ["WASH"] }, { en: "Provision of safe drinking water and sanitation services." },
-    ["infrastructure"], ["agua-dulce"]],
-  ["digital-infrastructure", { en: "Digital infrastructure", es: "Infraestructura digital" },
-    { en: ["Broadband", "Connectivity"] }, {}, ["infrastructure"], []],
-  ["housing", { en: "Housing", es: "Vivienda", pt: "Habitação" }, {}, {}, ["infrastructure"], []],
+  ["farm-energy-transition", { en: "Farm energy transition", es: "Transición energética agrícola" }, {},
+    { en: "Structural shift of an on-farm energy system away from fossil fuels." },
+    ["rural-infrastructure"], ["on-farm-renewable-energy"]],
+  ["rural-water-and-sanitation", { en: "Rural water and sanitation", es: "Agua y saneamiento rural", pt: "Água e saneamento rural" },
+    { en: ["WASH"] }, { en: "Provision of safe drinking water and sanitation services to farming communities." },
+    ["rural-infrastructure"], ["freshwater"]],
+  ["rural-digital-infrastructure", { en: "Rural digital infrastructure", es: "Infraestructura digital rural" },
+    { en: ["Broadband", "Connectivity"] }, {}, ["rural-infrastructure"], []],
+  ["rural-housing", { en: "Rural housing", es: "Vivienda rural", pt: "Habitação rural" }, {}, {}, ["rural-infrastructure"], []],
 
-  ["institutions-governance", { en: "Institutions and governance", es: "Instituciones y gobernanza" }, {},
-    { en: "Rules, organisations and practices through which public authority is exercised." }, [], []],
-  ["public-procurement", { en: "Public procurement", es: "Compras públicas", pt: "Compras públicas" }, {},
-    {}, ["institutions-governance"], []],
-  ["transparency", { en: "Transparency", es: "Transparencia" }, { en: ["Open government"] },
-    { en: "Public availability of information about government decisions and spending." },
-    ["institutions-governance"], ["anti-corruption"]],
-  ["anti-corruption", { en: "Anti-corruption", es: "Anticorrupción" }, {}, {}, ["institutions-governance"], []],
-  ["digital-government", { en: "Digital government", es: "Gobierno digital", pt: "Governo digital" },
-    { en: ["E-government", "GovTech"] }, {}, ["institutions-governance"], ["digital-infrastructure"]],
-  ["citizen-security", { en: "Citizen security", es: "Seguridad ciudadana", pt: "Segurança cidadã" }, {},
-    { en: "Protection of people from crime and violence." }, ["institutions-governance"], []],
+  ["agricultural-institutions-governance", { en: "Agricultural institutions and governance", es: "Instituciones y gobernanza agrícola" }, {},
+    { en: "Rules, organisations and practices through which farm-sector authority is exercised." }, [], []],
+  ["agricultural-public-procurement", { en: "Agricultural public procurement", es: "Compras públicas agrícolas", pt: "Compras públicas agrícolas" }, {},
+    {}, ["agricultural-institutions-governance"], []],
+  ["agricultural-transparency", { en: "Agricultural transparency", es: "Transparencia agrícola" }, { en: ["Open government"] },
+    { en: "Public availability of information about farm-sector decisions and spending." },
+    ["agricultural-institutions-governance"], ["agricultural-anti-corruption"]],
+  ["agricultural-anti-corruption", { en: "Agricultural anti-corruption", es: "Anticorrupción agrícola" }, {}, {}, ["agricultural-institutions-governance"], []],
+  ["agricultural-digital-government", { en: "Agricultural digital government", es: "Gobierno digital agrícola", pt: "Governo digital agrícola" },
+    { en: ["E-government", "GovTech"] }, {}, ["agricultural-institutions-governance"], ["rural-digital-infrastructure"]],
+  ["rural-citizen-security", { en: "Rural citizen security", es: "Seguridad ciudadana rural", pt: "Segurança cidadã rural" }, {},
+    { en: "Protection of farming communities from crime and violence." }, ["agricultural-institutions-governance"], []],
 
-  ["climate-finance", { en: "Climate finance", es: "Financiamiento climático", pt: "Financiamento climático" }, {},
-    { en: "Capital directed to mitigation and adaptation activities." },
-    ["cambio-climatico", "economic-development"], ["pago-servicios-ambientales"]],
-  ["disaster-risk-management", { en: "Disaster risk management", es: "Gestión del riesgo de desastres" },
+  ["agricultural-climate-finance", { en: "Agricultural climate finance", es: "Financiamiento climático agrícola", pt: "Financiamento climático agrícola" }, {},
+    { en: "Capital directed to farm-sector mitigation and adaptation activities." },
+    ["climate-change", "agricultural-economics"], ["payment-for-ecosystem-services"]],
+  ["agricultural-disaster-risk-management", { en: "Agricultural disaster risk management", es: "Gestión del riesgo de desastres agrícolas" },
     { en: ["DRM", "Disaster risk reduction"] },
-    { en: "Reduction of exposure and vulnerability to natural hazards." },
-    ["cambio-climatico"], ["adaptacion-climatica"]],
-  ["biodiversity", { en: "Biodiversity", es: "Biodiversidad", pt: "Biodiversidade" },
-    { en: ["Biological diversity"] }, { en: "Variety of life at genetic, species and ecosystem levels." },
-    ["recursos-naturales"], ["areas-protegidas"], { mappings: [
+    { en: "Reduction of exposure and vulnerability of farms to natural hazards." },
+    ["climate-change"], ["climate-adaptation"]],
+  ["agricultural-biodiversity", { en: "Agricultural biodiversity", es: "Biodiversidad agrícola", pt: "Biodiversidade agrícola" },
+    { en: ["Agrobiodiversity"] }, { en: "Variety of life at genetic, species and ecosystem levels within farming systems." },
+    ["natural-resources"], ["protected-areas"], { mappings: [
       ["exactMatch", "http://www.eionet.europa.eu/gemet/concept/896", "1.0", "approved"]] }],
-  ["ecosystem-services", { en: "Ecosystem services", es: "Servicios ecosistémicos", pt: "Serviços ecossistêmicos" }, {},
-    { en: "Benefits people obtain from ecosystems." }, ["recursos-naturales"], ["pago-servicios-ambientales"]],
-  ["circular-economy", { en: "Circular economy", es: "Economía circular" }, {}, {},
-    ["economic-development", "recursos-naturales"], []],
+  ["agricultural-ecosystem-services", { en: "Agricultural ecosystem services", es: "Servicios ecosistémicos agrícolas", pt: "Serviços ecossistêmicos agrícolas" }, {},
+    { en: "Benefits farming communities obtain from ecosystems." }, ["natural-resources"], ["payment-for-ecosystem-services"]],
+  ["circular-agricultural-economy", { en: "Circular agricultural economy", es: "Economía agrícola circular" }, {}, {},
+    ["agricultural-economics", "natural-resources"], []],
 
-  ["geographic-scope", { en: "Geographic scope", es: "Ámbito geográfico" }, {},
+  ["regional-scope", { en: "Regional scope", es: "Ámbito regional" }, {},
     { en: "Regional groupings used to scope publications and datasets." }, [], []],
-  ["sub-saharan-africa", { en: "Sub-Saharan Africa", es: "África subsahariana", pt: "África subsaariana" }, {}, {}, ["geographic-scope"], []],
-  ["east-africa", { en: "East Africa", es: "África Oriental", pt: "África Oriental" }, {}, {}, ["geographic-scope"], []],
-  ["south-asia", { en: "South Asia", es: "Asia Meridional", pt: "Ásia do Sul" }, {}, {}, ["geographic-scope"], []],
-  ["mediterranean-basin", { en: "Mediterranean Basin", es: "Cuenca Mediterránea", pt: "Bacia do Mediterrâneo" }, {}, {}, ["geographic-scope"], []],
+  ["sub-saharan-africa", { en: "Sub-Saharan Africa", es: "África subsahariana", pt: "África subsaariana" }, {}, {}, ["regional-scope"], []],
+  ["east-africa", { en: "East Africa", es: "África Oriental", pt: "África Oriental" }, {}, {}, ["regional-scope"], []],
+  ["south-asia", { en: "South Asia", es: "Asia Meridional", pt: "Ásia do Sul" }, {}, {}, ["regional-scope"], []],
+  ["mediterranean-basin", { en: "Mediterranean Basin", es: "Cuenca Mediterránea", pt: "Bacia do Mediterrâneo" }, {}, {}, ["regional-scope"], []],
   ["oceania", { en: "Oceania", es: "Oceanía", pt: "Oceania" },
-    {}, {}, ["geographic-scope"], ["bosque-tropical-humedo", "cuenca-hidrografica"]]
+    {}, {}, ["regional-scope"], ["tropical-rainforest", "watershed"]]
 ];
 
 /* Granular extension terms, added under the existing branches so the demo
    shows a realistically uneven mix of top-level and deep terms. */
 const MOCK_SUBJECTS_EXTRA = [
-  ["access-to-finance", { en: "Access to Finance", es: "Acceso al financiamiento" }, {}, {},
-    ["financial-inclusion"], []],
-  ["fintech", { en: "Fintech", es: "Tecnología financiera" }, {}, {}, ["financial-inclusion"], []],
-  ["smes", { en: "Small and Medium Enterprises", es: "Pequeñas y medianas empresas" },
-    { en: ["SMEs", "MSMEs"] }, {}, ["economic-development"], ["access-to-finance"]],
-  ["taxation", { en: "Taxation", es: "Tributación" }, {}, {}, ["fiscal-policy"], []],
-  ["inflation", { en: "Inflation", es: "Inflación", pt: "Inflação" }, {}, {}, ["economic-development"], []],
-  ["monetary-policy", { en: "Monetary Policy", es: "Política monetaria" }, {}, {}, ["economic-development"], []],
-  ["labor-markets", { en: "Labor Markets", es: "Mercados laborales", pt: "Mercados de trabalho" },
-    { en: ["Labour markets", "Employment"] }, {}, ["social-development"], ["youth-employment", "informal-economy"]],
-  ["inequality", { en: "Inequality", es: "Desigualdad", pt: "Desigualdade" }, {}, {},
-    ["social-development"], ["poverty-reduction"]],
-  ["public-health", { en: "Public Health", es: "Salud pública", pt: "Saúde pública" }, {}, {}, ["health-systems"], []],
-  ["decarbonization", { en: "Decarbonization", es: "Descarbonización", pt: "Descarbonização" }, {}, {},
-    ["mitigacion-climatica"], ["energy-transition"]],
-  ["green-finance", { en: "Green Finance", es: "Finanzas verdes" }, {}, {},
-    ["climate-finance"], ["renewable-energy"]],
-  ["resilience", { en: "Resilience", es: "Resiliencia", pt: "Resiliência" }, {}, {},
-    ["adaptacion-climatica"], ["disaster-risk-management"]],
-  ["smart-cities", { en: "Smart Cities", es: "Ciudades inteligentes" }, {}, {},
-    ["infrastructure"], ["digital-infrastructure", "urban-mobility"]],
-  ["urban-planning", { en: "Urban Planning", es: "Planificación urbana", pt: "Planejamento urbano" }, {}, {},
-    ["infrastructure"], ["housing"]],
-  ["rule-of-law", { en: "Rule of Law", es: "Estado de derecho" }, {}, {}, ["institutions-governance"], []],
-  ["regulatory-frameworks", { en: "Regulatory Frameworks", es: "Marcos regulatorios" }, {}, {},
-    ["institutions-governance"], []],
-  ["impact-evaluation", { en: "Impact Evaluation", es: "Evaluación de impacto", pt: "Avaliação de impacto" }, {},
+  ["rural-access-to-finance", { en: "Rural access to finance", es: "Acceso rural al financiamiento" }, {}, {},
+    ["rural-financial-inclusion"], []],
+  ["agri-fintech", { en: "Agri-fintech", es: "Tecnología financiera agrícola" }, {}, {}, ["rural-financial-inclusion"], []],
+  ["small-farm-enterprises", { en: "Small farm enterprises", es: "Pequeñas empresas agrícolas" },
+    { en: ["SMEs", "MSMEs"] }, {}, ["agricultural-economics"], ["rural-access-to-finance"]],
+  ["agricultural-taxation", { en: "Agricultural taxation", es: "Tributación agrícola" }, {}, {}, ["farm-subsidy-policy"], []],
+  ["farm-input-inflation", { en: "Farm input inflation", es: "Inflación de insumos agrícolas", pt: "Inflação de insumos agrícolas" }, {}, {},
+    ["agricultural-economics"], []],
+  ["agricultural-monetary-policy", { en: "Agricultural monetary policy", es: "Política monetaria agrícola" }, {}, {},
+    ["agricultural-economics"], []],
+  ["farm-labor-markets", { en: "Farm labor markets", es: "Mercados laborales agrícolas", pt: "Mercados de trabalho agrícola" },
+    { en: ["Farm labour markets", "Farm employment"] }, {}, ["rural-development"], ["youth-employment-in-agriculture", "informal-farm-labor"]],
+  ["rural-inequality", { en: "Rural inequality", es: "Desigualdad rural", pt: "Desigualdade rural" }, {}, {},
+    ["rural-development"], ["rural-poverty-reduction"]],
+  ["rural-public-health", { en: "Rural public health", es: "Salud pública rural", pt: "Saúde pública rural" }, {}, {}, ["rural-health-systems"], []],
+  ["farm-decarbonization", { en: "Farm decarbonization", es: "Descarbonización agrícola", pt: "Descarbonização agrícola" }, {}, {},
+    ["climate-mitigation"], ["farm-energy-transition"]],
+  ["green-agri-finance", { en: "Green agri-finance", es: "Finanzas agrícolas verdes" }, {}, {},
+    ["agricultural-climate-finance"], ["on-farm-renewable-energy"]],
+  ["farm-resilience", { en: "Farm resilience", es: "Resiliencia agrícola", pt: "Resiliência agrícola" }, {}, {},
+    ["climate-adaptation"], ["agricultural-disaster-risk-management"]],
+  ["smart-farming-hubs", { en: "Smart farming hubs", es: "Centros de agricultura inteligente" }, {}, {},
+    ["rural-infrastructure"], ["rural-digital-infrastructure", "rural-urban-mobility"]],
+  ["rural-land-use-planning", { en: "Rural land-use planning", es: "Planificación rural del uso del suelo", pt: "Planejamento rural do uso do solo" }, {}, {},
+    ["rural-infrastructure"], ["rural-housing"]],
+  ["agricultural-rule-of-law", { en: "Agricultural rule of law", es: "Estado de derecho agrícola" }, {}, {}, ["agricultural-institutions-governance"], []],
+  ["agricultural-regulatory-frameworks", { en: "Agricultural regulatory frameworks", es: "Marcos regulatorios agrícolas" }, {}, {},
+    ["agricultural-institutions-governance"], []],
+  ["impact-evaluation", { en: "Impact evaluation", es: "Evaluación de impacto", pt: "Avaliação de impacto" }, {},
     { en: "Methods that estimate the causal effect of an intervention." }, ["research-methods"], []],
   ["research-methods", { en: "Research methods and data", es: "Métodos de investigación y datos" }, {},
     { en: "How evidence is produced, not what it is about." }, [], []],
-  ["household-survey", { en: "Household Survey", es: "Encuesta de hogares", pt: "Pesquisa domiciliar" }, {}, {},
+  ["household-survey", { en: "Household survey", es: "Encuesta de hogares", pt: "Pesquisa domiciliar" }, {}, {},
     ["research-methods"], []],
   ["statistics", { en: "Statistics", es: "Estadísticas", pt: "Estatísticas" }, {}, {}, ["research-methods"], []],
-  ["data-management", { en: "Data Management", es: "Gestión de datos" }, {}, {}, ["research-methods"], []]
+  ["data-management", { en: "Data management", es: "Gestión de datos" }, {}, {}, ["research-methods"], []]
 ];
 
 /** Write one scheme's concepts into the store. Used for every scheme. */
@@ -7600,9 +7602,9 @@ function buildScheme(s, schemeId, rows, opts) {
     const c = iri(cid(id));
     s.add(g, c, P("rdf:type"), P("skos:Concept"));
     s.add(g, c, P("skos:inScheme"), iri(sIri));
-    s.add(g, c, P("tax:lifecycleStatus"), lit(id === "consulta-previa" ? "proposed" : "approved"));
+    s.add(g, c, P("tax:lifecycleStatus"), lit(id === "community-land-use-consultation" ? "proposed" : "approved"));
     s.add(g, c, P("dct:created"), lit(t0, null, NS.xsd + "dateTime"));
-    s.add(g, c, P("dct:creator"), iri(`${NS.ex}user/marta`));
+    s.add(g, c, P("dct:creator"), iri(`${NS.ex}user/nadia`));
 
     // SKOS-XL label + materialised plain shortcut (ARCHITECTURE §4)
     const addLabel = (kind, text, lang, source) => {
@@ -7972,29 +7974,29 @@ function buildMock() {
     Object.entries(titles).forEach(([l, v]) => s.add(g, ci, P("skos:prefLabel"), lit(v, l)));
     members.forEach(m => s.add(g, ci, P("skos:member"), iri(cid(m))));
   };
-  coll("sdg-priority-2026",
+  coll("priority-terms-2026",
     { en: "2026 priority terms", es: "Términos prioritarios 2026" },
-    ["climate-finance", "gender-equality", "financial-inclusion", "digital-government",
-     "disaster-risk-management", "water-and-sanitation"]);
+    ["agricultural-climate-finance", "gender-equality-in-farming", "rural-financial-inclusion", "agricultural-digital-government",
+     "agricultural-disaster-risk-management", "rural-water-and-sanitation"]);
   coll("cross-cutting",
     { en: "Cross-cutting themes", es: "Temas transversales", pt: "Temas transversais" },
-    ["gender-equality", "pueblos-indigenas", "cambio-climatico", "transparency"]);
+    ["gender-equality-in-farming", "rural-farming-communities", "climate-change", "agricultural-transparency"]);
   coll("under-review",
     { en: "Under editorial review", es: "En revisión editorial" },
-    ["consulta-previa", "informal-economy", "circular-economy"]);
+    ["community-land-use-consultation", "informal-farm-labor", "circular-agricultural-economy"]);
 
   // --- deliberately seeded quality problems, so the dashboard has teeth ---
   // duplicate pt prefLabel
-  s.add(g, iri(cid("manglar")), P("skos:prefLabel"), lit("Mangue", "pt"));
+  s.add(g, iri(cid("mangrove")), P("skos:prefLabel"), lit("Mangue", "pt"));
   // scope + editorial notes on one concept
-  s.add(g, iri(cid("bosque-tropical-humedo")), P("skos:scopeNote"),
+  s.add(g, iri(cid("tropical-rainforest")), P("skos:scopeNote"),
     lit("Usar para bosques con precipitación anual superior a 2000 mm. No usar para bosque seco.", "es"));
-  s.add(g, iri(cid("bosque-tropical-humedo")), P("skos:editorialNote"),
+  s.add(g, iri(cid("tropical-rainforest")), P("skos:editorialNote"),
     lit("Revisar alineación con AGROVOC tras la actualización de 2026.", "es"));
-  s.add(g, iri(cid("bosque-tropical-humedo")), P("skos:example"), lit("Bosques de tierras bajas, bosques nubosos de montaña", "es"));
+  s.add(g, iri(cid("tropical-rainforest")), P("skos:example"), lit("Bosques de tierras bajas, bosques nubosos de montaña", "es"));
   // a deprecated concept
-  s.add(g, iri(cid("zonas-costeras")), P("tax:lifecycleStatus"), lit("deprecated"));
-  s.remove(g, iri(cid("zonas-costeras")), P("tax:lifecycleStatus"), lit("approved"));
+  s.add(g, iri(cid("coastal-zones")), P("tax:lifecycleStatus"), lit("deprecated"));
+  s.remove(g, iri(cid("coastal-zones")), P("tax:lifecycleStatus"), lit("approved"));
 
   // seed a couple of audit events so History is not empty
   const ag = G.audit(t0);
@@ -8009,11 +8011,11 @@ function buildMock() {
     if (newV) s.add(ag, ev, P("tax:newValue"), lit(newV, "es"));
     if (why) s.add(ag, ev, P("tax:rationale"), lit(why));
   };
-  mkEv("bosque-tropical-humedo", "CreateConcept", null, "Bosque tropical húmedo", "marta", "2026-02-14T09:12:00Z", "Importado durante la construcción inicial de la taxonomía");
-  mkEv("bosque-tropical-humedo", "EditPrefLabel", "Selva tropical", "Bosque tropical húmedo", "marta", "2026-03-02T11:40:00Z", "Alineado con terminología FAO");
-  mkEv("bosque-tropical-humedo", "AddMapping", null, "agrovoc:c_7797", "diego", "2026-04-18T15:05:00Z", null);
-  mkEv("manglar", "CreateConcept", null, "Manglar", "diego", "2026-02-14T09:12:00Z", "Importado durante la construcción inicial de la taxonomía");
-  mkEv("deforestacion", "AddBroader", null, "Bosques", "marta", "2026-05-21T08:30:00Z", "Polijerarquía solicitada por el equipo de clima");
+  mkEv("tropical-rainforest", "CreateConcept", null, "Bosque tropical húmedo", "nadia", "2026-02-14T09:12:00Z", "Importado durante la construcción inicial de la taxonomía");
+  mkEv("tropical-rainforest", "EditPrefLabel", "Selva tropical", "Bosque tropical húmedo", "nadia", "2026-03-02T11:40:00Z", "Alineado con terminología FAO");
+  mkEv("tropical-rainforest", "AddMapping", null, "agrovoc:c_7797", "oskar", "2026-04-18T15:05:00Z", null);
+  mkEv("mangrove", "CreateConcept", null, "Manglar", "oskar", "2026-02-14T09:12:00Z", "Importado durante la construcción inicial de la taxonomía");
+  mkEv("deforestation", "AddBroader", null, "Bosques", "nadia", "2026-05-21T08:30:00Z", "Polijerarquía solicitada por el equipo de clima");
 
   // config graph — the marker that tells the app this DB is ours
   s.add(G.config, iri(G.config), P("rdf:type"), P("tax:TaxonomyAppConfig"));
@@ -8049,122 +8051,122 @@ function buildMock() {
   const PUBS = [
     ["20149", "Smallholder Access to Seed Credit in West Africa", "en",
       "technical-notes", null, "2026-09", "en", false,
-      ["Boateng, Ama", "Keita, Moussa"],
+      ["Dlamini, Zanele", "Osei, Kwabena"],
       "Examines how formal and informal credit shapes smallholder access to improved seed in two West African countries.",
       ["Women-Led Livelihood Diversification", "Smallholder Price Volatility"], ["west-africa"],
-      "Manual", "1.0", "marta", "2026-09-10T09:00:00Z"],
+      "Manual", "1.0", "nadia", "2026-09-10T09:00:00Z"],
 
     ["20031", "Reforestación y manejo comunitario en bosques templados", "es",
       "working-papers", null, "2026-07", "es", true,
-      ["Ferreira, Ana Lucía", "Rojas, Mateo"],
+      ["Petrov, Ivan", "Lindqvist, Freja"],
       "Analiza esquemas de manejo forestal comunitario y su efecto sobre la cobertura de bosques templados.",
       ["Native Reforestation", "Riparian Silviculture"], ["mediterranean-basin"],
-      "Manual", "1.0", "marta", "2026-07-22T11:15:00Z"],
+      "Manual", "1.0", "nadia", "2026-07-22T11:15:00Z"],
 
     ["19887", "Climate Finance for Smallholder Irrigation in South Asia", "en",
       "technical-notes", "climate-and-crops-review", "2026-05", "en", true,
-      ["Rahman, Farida", "Silva, Priya"],
+      ["Iqbal, Sana", "Tanaka, Haruki"],
       "Reviews blended-finance instruments used to fund irrigation upgrades among smallholders.",
       ["Drip Irrigation Scheduling", "Deficit Water Use Efficiency"], ["south-asia"],
-      "Manual", "1.0", "diego", "2026-05-14T14:05:00Z"],
+      "Manual", "1.0", "oskar", "2026-05-14T14:05:00Z"],
 
     ["19742", "Conservação de polinizadores nativos em sistemas agroflorestais", "pt",
       "discussion-papers", null, "2026-03", "pt", false,
-      ["Oliveira, Rafael", "Costa, Juliana"],
+      ["Alvarenga, Luciana", "Corrêa, Débora"],
       "Avalia práticas de agrofloresta que favorecem abelhas nativas e outros polinizadores selvagens.",
       ["Native Bee Pollination Service", "Agroforestry Cover Cropping"], ["east-africa"],
-      "Manual", "1.0", "diego", "2026-03-02T08:40:00Z"],
+      "Manual", "1.0", "oskar", "2026-03-02T08:40:00Z"],
 
     ["19605", "Informality and Productivity Among Smallholder Traders", "en",
       "working-papers", "agricultural-trade-monitor", "2025-12", "en", true,
-      ["Adeyemi, Tunde", "Okafor, Ngozi"],
+      ["Okoro, Chidinma", "Chukwu, Obinna"],
       "Estimates the productivity cost of market informality among smallholder traders across six countries.",
       ["Smallholder Price Volatility", "Commercial Cooperative Marketing"], ["west-africa", "east-africa"],
       "Suggested", "0.85", "auto-classifier", "2025-12-04T07:30:00Z"],
 
     ["19488", "Transferencias de semillas y recuperación tras desastres climáticos", "es",
       "monographs", "field-notes", "2025-10", "es", true,
-      ["Paredes, Silvia", "Herrera, Marcos"],
+      ["Castellanos, Rubén", "Abril, Natalia"],
       "Sintetiza evaluaciones de programas de transferencia de semillas tras eventos climáticos extremos.",
       ["Multi-Year Drought Contingency", "Community Seed Bank Accession"], ["mediterranean-basin"],
-      "Manual", "1.0", "marta", "2025-10-18T13:00:00Z"],
+      "Manual", "1.0", "nadia", "2025-10-18T13:00:00Z"],
 
     ["19350", "Water Harvesting Infrastructure Gaps in Arid Farming Regions", "en",
       "policy-briefs", null, "2025-08", "en", false,
-      ["Hassan, Leila", "Kimathi, Peter"],
+      ["Mwangi, Njeri", "Nkomo, Thabo"],
       "Quantifies the financing gap for small-scale water harvesting across arid farming districts.",
       ["Drip Water Rights", "Deficit Canal Maintenance"], ["east-africa"],
-      "Manual", "1.0", "marta", "2025-08-09T16:10:00Z"],
+      "Manual", "1.0", "nadia", "2025-08-09T16:10:00Z"],
 
     ["19204", "Registro de nuevas variedades y acceso de pequeños productores", "es",
       "technical-notes", null, "2025-06", "es", false,
-      ["Mamani, Elena", "Duarte, Rodrigo"],
+      ["Hidalgo, Esteban", "Velazquez, Ignacio"],
       "Examina cómo los procedimientos de registro de variedades afectan el acceso de pequeños productores a semilla mejorada.",
       ["Marker-Assisted Variety Release", "Wide-Cross Breeding Line"], ["south-asia"],
-      "Manual", "1.0", "marta", "2025-06-14T10:00:00Z"],
+      "Manual", "1.0", "nadia", "2025-06-14T10:00:00Z"],
 
     ["19067", "Mangrove Restoration as Coastal Climate Adaptation", "en",
       "working-papers", null, "2025-04", "en", true,
-      ["Chen, Wei", "Barrios, Fernanda"],
+      ["Delacroix, Camille", "Baptiste, Marielle"],
       "Compares the avoided-damage value of mangrove restoration against engineered coastal defences.",
       ["Pollinator Habitat Restoration", "Riparian Species Monitoring"], ["oceania"],
-      "Manual", "1.0", "diego", "2025-04-02T10:45:00Z"],
+      "Manual", "1.0", "oskar", "2025-04-02T10:45:00Z"],
 
     ["18930", "Agroflorestas e sequestro de carbono em pequenas propriedades", "pt",
       "working-papers", null, "2025-02", "pt", false,
-      ["Almeida, Paulo", "Ribeiro, Juliana"],
+      ["Santana, Mateus", "Ueda, Kenji"],
       "Modela as receitas e o sequestro de carbono de sistemas agroflorestais frente à monocultura.",
       ["Agroforestry Soil-Building Practice", "Low-Input Conservation Tillage"], ["east-africa"],
-      "Manual", "1.0", "marta", "2025-02-11T09:15:00Z"],
+      "Manual", "1.0", "nadia", "2025-02-11T09:15:00Z"],
 
     ["18792", "Digital Extension Tools and Farmer Training Outcomes", "en",
       "technical-notes", "extension-learning-series", "2024-12", "en", true,
-      ["Fiorito, Lucas"],
+      ["Owusu, Akosua"],
       "Benchmarks adoption and learning outcomes from mobile and peer-to-peer extension tools.",
       ["Mobile Extension Service", "Digital Farmer Training"], ["south-asia"],
       "Suggested", "0.74", "auto-classifier", "2024-12-19T07:30:00Z"],
 
     ["18655", "Fortalecimento de bancos de sementes comunitários", "pt",
       "discussion-papers", "seed-bank-bulletin", "2024-10", "pt", true,
-      ["Silva, Marta", "Santos, Beatriz"],
+      ["Nakashima, Rin", "Mensah, Kojo"],
       "Identifica obstáculos regulatórios que limitam a expansão de bancos de sementes comunitários.",
       ["Community Seed Bank Accession", "Duplicate Germplasm Exchange"], ["east-africa"],
-      "Manual", "1.0", "diego", "2024-10-27T15:10:00Z"],
+      "Manual", "1.0", "oskar", "2024-10-27T15:10:00Z"],
 
     ["18511", "Gender Equity in Access to Rural Credit", "en",
       "working-papers", null, "2024-08", "en", false,
-      ["Okonjo, Amara", "Grant, Eleanor"],
+      ["Haugen, Kristian", "Larsson, Elin"],
       "Documents the gender gap in agricultural credit and tests two products designed to close it.",
       ["Indigenous Rural Credit", "Women-Led Off-Farm Income"], ["west-africa"],
-      "Manual", "1.0", "marta", "2024-08-08T12:25:00Z"],
+      "Manual", "1.0", "nadia", "2024-08-08T12:25:00Z"],
 
     ["18368", "Degradación del suelo y seguridad alimentaria estacional", "es",
       "policy-briefs", null, "2024-06", "es", false,
-      ["Reyes, Guillermo", "Morales, Ana"],
+      ["Hagen, Sofie", "Abara, Chioma"],
       "Vincula la degradación de suelos con la inseguridad alimentaria estacional.",
       ["Eroded Soil Erosion", "Household Dietary Diversity"], ["mediterranean-basin"],
-      "Manual", "1.0", "marta", "2024-06-15T08:50:00Z"],
+      "Manual", "1.0", "nadia", "2024-06-15T08:50:00Z"],
 
     ["18220", "Urban-Adjacent Farming and Air Quality in Growing Cities", "en",
       "monographs", "global-harvest-outlook", "2024-04", "en", true,
-      ["Barros, Tomás", "Nakamura, Yuki"],
+      ["Varga, Zsófia", "Sørensen, Mikkel"],
       "Links peri-urban farming practices to measured particulate concentrations and estimated health costs.",
       ["Shared Cold Storage Unit", "Cloud-Based Farm Management Software"], ["east-asia"],
       "Suggested", "0.91", "auto-classifier", "2024-04-05T06:00:00Z"],
 
     ["18083", "Early-Stage Plant Breeding Programmes: A Regional Evidence Review", "en",
       "monographs", null, "2024-02", "en", true,
-      ["Silva, Marta", "Thompson, Andre"],
+      ["Botha, Lienke", "Kowalski, Marek"],
       "Reviews impact evaluations of early-stage breeding programmes and their cost-effectiveness.",
       ["Marker-Assisted Plant Breeding", "Wide-Cross Trait Selection"], ["south-asia"],
-      "Manual", "1.0", "diego", "2024-02-21T11:35:00Z"],
+      "Manual", "1.0", "oskar", "2024-02-21T11:35:00Z"],
 
     ["17946", "Tax and Registration Costs for Seed Companies", "en",
       "working-papers", null, "2023-12", "en", false,
-      ["Ferreyra, Nicolás"],
+      ["Lehtinen, Aino"],
       "Assesses registration fee reforms and their effect on formal seed company entry.",
       ["Active Seed Certification", "National Agricultural Policy"], ["north-america"],
-      "Manual", "1.0", "marta", "2023-12-30T09:00:00Z"]
+      "Manual", "1.0", "nadia", "2023-12-30T09:00:00Z"]
   ];
 
   const cidFor = (schemeId, id) => `${NS.ex}${schemeId}/concept/${id}`;
@@ -8221,7 +8223,7 @@ function buildMock() {
   const dl = iri(`${NS.ex}load/01J8ZQ2R4M0000000000000000`);
   s.add(G.loads, dl, P("rdf:type"), P("tax:DataLoad"));
   s.add(G.loads, dl, P("tax:targetGraph"), iri(G.incoming("subject-facet")));
-  s.add(G.loads, dl, P("tax:owner"), iri(`${NS.ex}user/diego`));
+  s.add(G.loads, dl, P("tax:owner"), iri(`${NS.ex}user/oskar`));
   s.add(G.loads, dl, P("dct:created"), lit(old, null, NS.xsd + "dateTime"));
   s.add(G.loads, dl, P("tax:sourceFile"), lit("agrovoc-extract.ttl"));
   s.add(G.loads, dl, P("tax:sourceBytes"), lit("2411008", null, NS.xsd + "integer"));
@@ -8245,7 +8247,7 @@ function labelText(c) {
   };
 }
 
-/* --- language filtering (FR-9.2) ------------------------------------
+/* --- language filtering ------------------------------------
    "has a label in X" and "missing a label in X" are the two questions a
    multilingual editorial team actually asks. Both keep the hierarchy intact:
    an ancestor stays visible when a descendant matches, so you never lose
@@ -9289,7 +9291,7 @@ function addPrefLabelDirect(c, text, lang) {
   }));
 }
 
-/** Drag-and-drop reparenting (FR-2.4), with a preview before it commits. */
+/** Drag-and-drop reparenting, with a preview before it commits. */
 function moveConceptPrompt(src, target, addInstead) {
   if (src === target) return;
   if (pathsTo(target).some(p => p.includes(src))) {
@@ -9995,7 +9997,7 @@ function langChip(l, key, kind) {
  * only the tag on the literal does, on the SKOS-XL literalForm and the
  * materialised plain shortcut together, in one transaction.
  * The label's own IRI is deliberately NOT re-minted: a minted IRI is opaque
- * after creation (STD-3), so it does not track the content it once described.
+ * after creation, so it does not track the content it once described.
  */
 function retagLabel(c, key, kind, oldLang, text, newLang) {
   if (oldLang === newLang) return;
@@ -13904,14 +13906,14 @@ function simulateConcurrentEdit() {
   const pl = xlLabels(c, "prefLabel")[0];
   if (!pl) return;
   const g = currentGraph();
-  const changed = pl.text + " (rev. Marta)";
+  const changed = pl.text + " (rev. Nadia)";
   State.store.remove(g, iri(pl.labelIri), P("skosxl:literalForm"), lit(pl.text, pl.lang));
   State.store.add(g, iri(pl.labelIri), P("skosxl:literalForm"), lit(changed, pl.lang));
   State.store.remove(g, iri(c), P("skos:prefLabel"), lit(pl.text, pl.lang));
   State.store.add(g, iri(c), P("skos:prefLabel"), lit(changed, pl.lang));
   State.revision++;
   logInternal(`another session wrote to ${short(g)} — revision is now ${State.revision}; this view is stale`);
-  alert(`Marta just renamed this concept's preferred label to "${changed}" in another session.\n\nThis view has NOT been refreshed. Edit the preferred label now and the guarded update will find a changed pre-state and refuse to clobber her work.`);
+  alert(`Nadia just renamed this concept's preferred label to "${changed}" in another session.\n\nThis view has NOT been refreshed. Edit the preferred label now and the guarded update will find a changed pre-state and refuse to clobber her work.`);
 }
 
 function showConflict(m) {
@@ -15070,8 +15072,8 @@ function bootWorkspace() {
      vocabulary ships with two colleagues so the feature is visible at all.
      Offline mode has nobody else to show presence for. */
   State.presence = State.mode === "mock" ? [
-    { initials: "MA", name: "marta", color: "#a8571b", where: "bosques" },
-    { initials: "DI", name: "diego", color: "#2c5f9e", where: "mappings" }
+    { initials: "NA", name: "nadia", color: "#a8571b", where: "forests" },
+    { initials: "OS", name: "oskar", color: "#2c5f9e", where: "mappings" }
   ] : [];
 
   logInternal(`connected in ${State.mode} mode to ${State.db || (State.offline && State.offline.taxonomyName) || "—"}`);
@@ -16460,7 +16462,7 @@ document.getElementById("btnMenu").onclick = (e) => {
 };
 
 
-/* ---------------- URI templates (FR-1.1 / FR-1.2) ---------------- */
+/* ---------------- URI templates ---------------- */
 const URI_CLASSES = ["concept", "label", "restriction", "mapping", "audit", "release"];
 
 function openUriTemplates() {
@@ -16520,8 +16522,8 @@ function openUriTemplates() {
         let out;
         try {
           out = [
-            ["concept", "concept", "bosque-tropical-humedo"],
-            ["label", "label", "bosque-tropical-humedo.preflabel-es"],
+            ["concept", "concept", "tropical-rainforest"],
+            ["label", "label", "tropical-rainforest.preflabel-es"],
             ["restriction", "restriction", "Farm.hasCrop.minCardinality"]
           ].map(([k, kind, localId]) => {
             const parts = expandTemplateParts(resolveTemplate(k), kind, localId);
@@ -16808,7 +16810,7 @@ async function seedDatabase(name, options, sourceQuads, pending) {
 }
 
 /* =================================================================
-   FR-12 — bulk import and export
+   Bulk import and export
    Serialisation is the easy half. The hard half is import: an unfamiliar
    file has to be staged, profiled, decided about, previewed and only then
    committed — never dumped straight into the editorial graph.
@@ -16826,7 +16828,7 @@ const IO_FORMATS = {
 
 
 /* =================================================================
-   FR-12b — loading a file straight into the database
+   Loading a file straight into the database
 
    The staged import above reads a file into this tab, profiles it there,
    and writes the result out. That is the right shape for a file a person
@@ -19823,7 +19825,7 @@ async function enableFullTextSearch() {
 
    Stardog's RBAC is the whole authorisation model; this app adds none of
    its own. What it adds is the part that was missing: a vocabulary lives
-   in four or five named graphs, and "let Marta edit Subjects" means eight
+   in four or five named graphs, and "let Nadia edit Subjects" means eight
    grants across them that nobody should have to assemble by hand.
 
    Three facts from measuring a live server shape everything here:
@@ -21647,7 +21649,7 @@ function tabDiscussion(c) {
   const may = canDiscussHere();
   return `${may ? `<div class="section"><h3>Ask about this term</h3>
       <textarea id="dNew" style="min-height:62px"
-        placeholder="Is this the same thing as Renewable energy? @marta"></textarea>
+        placeholder="Is this the same thing as Renewable energy? @nadia"></textarea>
       <button class="btn primary sm" id="dStart" style="margin-top:8px" disabled>Start a discussion</button>
       <div class="muted" style="font-size:11.5px;margin-top:6px">Naming somebody with an
         <span class="mono">@</span> puts this in their notifications.</div>

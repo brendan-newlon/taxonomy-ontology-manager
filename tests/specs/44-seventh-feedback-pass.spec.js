@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const FORESTS = A.sdg("bosques");
+const FORESTS = A.sdg("forests");
 
 /**
  * Coverage for the seventh feedback pass: the Triples tab excludes nothing

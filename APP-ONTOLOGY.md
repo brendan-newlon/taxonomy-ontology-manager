@@ -113,7 +113,7 @@ GRAPH <urn:taxonomy:app:audit> {
     tax:action tax:AddProperty ;
     tax:targetDatabase "plant-conservation-db" ;
     tax:targetGraph <urn:taxonomy:scheme:plant-conservation:draft> ;
-    tax:subject <https://taxonomy.example.org/id/plant-conservation/concept/bosque-tropical-humedo> ;
+    tax:subject <https://taxonomy.example.org/id/plant-conservation/concept/tropical-rainforest> ;
     tax:property dct:source ;
     tax:newValue "FAO AGROVOC" ;
     tax:outcome tax:Committed ;

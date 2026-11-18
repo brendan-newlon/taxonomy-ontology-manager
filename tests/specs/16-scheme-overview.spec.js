@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const MANGROVE = A.sdg("manglar");
+const MANGROVE = A.sdg("mangrove");
 
 const onOverview = (page) => page.evaluate(() =>
   State.selected === null && !!document.querySelector("#tabbody .ov"));

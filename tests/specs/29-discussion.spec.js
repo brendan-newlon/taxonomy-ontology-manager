@@ -11,7 +11,7 @@ const A = require("../helpers/app");
  * thread re-opens it rather than being said into a closed room.
  */
 
-const CONCEPT = A.sdg("bosques");
+const CONCEPT = A.sdg("forests");
 
 /** Start a thread through the app's own write path. */
 const start = (page, c, text) => page.evaluate(
@@ -120,9 +120,9 @@ test.describe("Naming somebody", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("an @name is recorded as a mention", async ({ page }) => {
-    await start(page, CONCEPT, "@marta is this right?");
+    await start(page, CONCEPT, "@nadia is this right?");
     const t = await threads(page, CONCEPT);
-    expect(t[0].comments[0].mentions).toEqual(["marta"]);
+    expect(t[0].comments[0].mentions).toEqual(["nadia"]);
   });
 
   test("an email address in a comment does not mention a stranger", async ({ page }) => {
@@ -132,15 +132,15 @@ test.describe("Naming somebody", () => {
   });
 
   test("the same name twice is one mention", async ({ page }) => {
-    await start(page, CONCEPT, "@marta — @marta, are you there?");
+    await start(page, CONCEPT, "@nadia — @nadia, are you there?");
     const t = await threads(page, CONCEPT);
-    expect(t[0].comments[0].mentions).toEqual(["marta"]);
+    expect(t[0].comments[0].mentions).toEqual(["nadia"]);
   });
 
   test("a thread that names you is separated from the rest", async ({ page }) => {
     const out = await page.evaluate(async () => {
-      State.conn = Object.assign({}, State.conn, { user: "marta" });
-      await Discussion.start({ concept: topConcepts()[0], text: "@marta please look" });
+      State.conn = Object.assign({}, State.conn, { user: "nadia" });
+      await Discussion.start({ concept: topConcepts()[0], text: "@nadia please look" });
       await Discussion.start({ concept: topConcepts()[1] || topConcepts()[0], text: "no names here" });
       return computeNotifications().map((n) => ({ id: n.id, text: n.text }));
     });
@@ -150,8 +150,8 @@ test.describe("Naming somebody", () => {
 
   test("your own name is picked out in the text, and other people's are not", async ({ page }) => {
     const out = await page.evaluate(() => {
-      State.conn = Object.assign({}, State.conn, { user: "marta" });
-      return { mine: commentHtml("@marta look"), theirs: commentHtml("@ronaldo look") };
+      State.conn = Object.assign({}, State.conn, { user: "nadia" });
+      return { mine: commentHtml("@nadia look"), theirs: commentHtml("@ronaldo look") };
     });
     expect(out.mine).toMatch(/class="mention me"/);
     expect(out.theirs).toMatch(/class="mention"/);

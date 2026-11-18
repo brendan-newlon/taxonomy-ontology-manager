@@ -2,13 +2,13 @@ const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
 const SKOS = "http://www.w3.org/2004/02/skos/core#";
-const MANGROVE = A.sdg("manglar");
-const FORESTS = A.sdg("bosques");
-const RAINFOREST = A.sdg("bosque-tropical-humedo");
+const MANGROVE = A.sdg("mangrove");
+const FORESTS = A.sdg("forests");
+const RAINFOREST = A.sdg("tropical-rainforest");
 
 const lifecycle = (page, c) => page.evaluate((x) => lifecycle(x), c);
 
-test.describe("Deprecating and deleting (FR-1.5, FR-10.3)", () => {
+test.describe("Deprecating and deleting", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("the Delete key on a selected concept opens the deprecate flow", async ({ page }) => {

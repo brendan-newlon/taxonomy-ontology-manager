@@ -174,11 +174,11 @@ test.describe("What the store holds, and what says so", () => {
       Backend.request = async (r) => {
         out.push({ method: r.method || "GET", path: r.path });
         if (r.path === "/admin/roles") return { ok: true, json: async () => ({ roles: [] }) };
-        if (r.path === "/admin/users/marta")
+        if (r.path === "/admin/users/nadia")
           return { ok: true, json: async () => ({ enabled: true, roles: [], permissions: [] }) };
         return { ok: true, json: async () => ({}), text: async () => "{}" };
       };
-      try { await openPersonPanel("marta"); } finally { Backend.request = real; }
+      try { await openPersonPanel("nadia"); } finally { Backend.request = real; }
       return out;
     });
     expect(sent.filter((c) => /update|transaction/.test(c.path))).toHaveLength(0);

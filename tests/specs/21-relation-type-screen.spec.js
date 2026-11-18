@@ -1,8 +1,8 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const MANGROVE = A.sdg("manglar");
-const FRESHWATER = A.sdg("agua-dulce");
+const MANGROVE = A.sdg("mangrove");
+const FRESHWATER = A.sdg("freshwater");
 const EXV = "https://example.org/vocab#";
 const ISO = "http://purl.org/iso25964/skos-thes#";
 

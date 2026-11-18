@@ -5,7 +5,7 @@ const SKOS = "http://www.w3.org/2004/02/skos/core#";
 const XL = "http://www.w3.org/2008/05/skos-xl#";
 const EX = "https://taxonomy.example.org/id/imported/";
 const AUTHOR = EX + "author-1";
-const MANGROVE = A.sdg("manglar");
+const MANGROVE = A.sdg("mangrove");
 
 /**
  * Shaped like the reference export, which has **no SKOS-XL at all** — 67,587

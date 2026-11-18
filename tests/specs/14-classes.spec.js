@@ -10,7 +10,7 @@ const EX = "https://taxonomy.example.org/id/imported/";
 const PERSON = SC + "Person";
 const ORG = SC + "Organization";
 const ORGUNIT = AG + "OrgUnit";
-const MANGROVE = A.sdg("manglar");
+const MANGROVE = A.sdg("mangrove");
 
 /**
  * Shaped like the reference export's entity registers: concepts that are also
@@ -51,7 +51,7 @@ const classes = (page) => page.evaluate(() => allClasses());
 const classesOf = (page, c) => page.evaluate((x) => conceptClasses(x), c);
 const treeMode = (page) => page.evaluate(() => State.treeMode);
 
-test.describe("Ontology classes on a concept (FR-5.1, read and assign)", () => {
+test.describe("Ontology classes on a concept", () => {
   test.beforeEach(async ({ page }) => {
     await A.boot(page, { scheme: "plant-conservation" });
     await importEntities(page);
@@ -274,7 +274,7 @@ test.describe("What the import profile suggests for a class", () => {
   test("a class whose subjects are nothing else is still suggested for dropping", async ({ page }) => {
     // the shape the drop-by-default rule exists for: vendor history stubs that
     // are only ever themselves
-    const PPT = "http://schema.semantic-web.at/ppt/history#";
+    const PPT = "https://vendor.example.org/schema/history#";
     const stubs = [];
     for (let i = 0; i < 5; i++)
       stubs.push(`<urn:ev:${i}> <${RDF}type> <${PPT}LiteralAddRemoveHistoryEvent> .`);
@@ -294,7 +294,7 @@ test.describe("What the import profile suggests for a class", () => {
 
 test.describe("What the import profile suggests for a property", () => {
   const AGENTS_ORCID = AG + "orcid";
-  const PPT = "http://schema.semantic-web.at/ppt/history#";
+  const PPT = "https://vendor.example.org/schema/history#";
 
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 

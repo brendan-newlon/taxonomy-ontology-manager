@@ -4,11 +4,11 @@ const A = require("../helpers/app");
 const SKOS = "http://www.w3.org/2004/02/skos/core#";
 const EXV = "https://example.org/vocab#";
 
-const MANGROVE = A.sdg("manglar");
-const FORESTS = A.sdg("bosques");
-const AGRI = A.sdg("agricultura-sostenible");
-const WATERSHED = A.sdg("cuenca-hidrografica");
-const FRESHWATER = A.sdg("agua-dulce");
+const MANGROVE = A.sdg("mangrove");
+const FORESTS = A.sdg("forests");
+const AGRI = A.sdg("sustainable-agriculture");
+const WATERSHED = A.sdg("watershed");
+const FRESHWATER = A.sdg("freshwater");
 
 /** A paired type, the shape a vendor custom relation usually arrives in. */
 const PART_OF = EXV + "partOf";
@@ -23,7 +23,7 @@ async function registerPair(page) {
   await A.registerRelType(page, { iri: HAS_PART, label: "Has part", inverse: PART_OF });
 }
 
-test.describe("Custom relation types (FR-2.1 generalised)", () => {
+test.describe("Custom relation types", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("the three SKOS types are registered before anything is added", async ({ page }) => {

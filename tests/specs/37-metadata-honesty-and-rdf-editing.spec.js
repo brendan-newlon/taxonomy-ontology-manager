@@ -1,7 +1,7 @@
 const { test, expect } = require("@playwright/test");
 const A = require("../helpers/app");
 
-const FORESTS = A.sdg("bosques");
+const FORESTS = A.sdg("forests");
 const ORCID = "https://example.org/ns/agents#orcid";
 
 /**

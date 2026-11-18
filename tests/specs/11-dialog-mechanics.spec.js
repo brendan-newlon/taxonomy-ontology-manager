@@ -48,7 +48,7 @@ test.describe("Dialog mechanics", () => {
   });
 
   test("the same holds for a picker that was pre-filled from the tree", async ({ page }) => {
-    const parent = A.sdg("agua-dulce");
+    const parent = A.sdg("freshwater");
     await A.rightClick(page, parent);
     await A.clickMenu(page, "child");
     await A.waitModal(page, "New concept");
@@ -109,7 +109,7 @@ test.describe("Dialog mechanics", () => {
   });
 
   test("choosing a picker row enables a button that was gated on it", async ({ page }) => {
-    await A.clickRow(page, A.sdg("agricultura-sostenible"));
+    await A.clickRow(page, A.sdg("sustainable-agriculture"));
     await A.selectTab(page, "relations");
     await A.addRelation(page, "broader");
     expect(await A.okDisabled(page)).toBe(true);
@@ -123,8 +123,8 @@ test.describe("Dialog mechanics", () => {
   });
 
   test("a picker low in a scrolling dialog is not clipped by it", async ({ page }) => {
-    await A.reveal(page, A.sdg("bosques"));
-    await A.rightClick(page, A.sdg("bosques"));
+    await A.reveal(page, A.sdg("forests"));
+    await A.rightClick(page, A.sdg("forests"));
     await A.clickMenu(page, "dep");                   // a long dialog whose body scrolls
     await A.waitModal(page, "Deprecate concept");
     await page.click("#mRepl");
@@ -160,8 +160,8 @@ test.describe("Dialog mechanics", () => {
     expect(await check()).toBe(true);
     await A.modalCancel(page);
 
-    await A.reveal(page, A.sdg("bosques"));
-    await A.rightClick(page, A.sdg("bosques"));
+    await A.reveal(page, A.sdg("forests"));
+    await A.rightClick(page, A.sdg("forests"));
     await A.clickMenu(page, "dep");
     await A.waitModal(page, "Deprecate concept");
     await page.click("#mRepl");
@@ -172,8 +172,8 @@ test.describe("Dialog mechanics", () => {
 
   test("a picker with no room below opens upwards", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 520 });
-    await A.reveal(page, A.sdg("bosques"));
-    await A.rightClick(page, A.sdg("bosques"));
+    await A.reveal(page, A.sdg("forests"));
+    await A.rightClick(page, A.sdg("forests"));
     await A.clickMenu(page, "dep");
     await A.waitModal(page, "Deprecate concept");
     await page.click("#mRepl");
@@ -191,8 +191,8 @@ test.describe("Dialog mechanics", () => {
   });
 
   test("keyboard accelerators work after clicking a concept, with no extra click", async ({ page }) => {
-    await A.reveal(page, A.sdg("manglar"));
-    await A.clickRow(page, A.sdg("manglar"));
+    await A.reveal(page, A.sdg("mangrove"));
+    await A.clickRow(page, A.sdg("mangrove"));
     await page.keyboard.press("F2");
     await page.waitForSelector("#tree input.rename", { timeout: 5_000 });
     await page.keyboard.press("Escape");

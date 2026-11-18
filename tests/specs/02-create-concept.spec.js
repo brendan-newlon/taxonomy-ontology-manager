@@ -13,7 +13,7 @@ async function created(page, text) {
   return c;
 }
 
-test.describe("Creating concepts (FR-1.3)", () => {
+test.describe("Creating concepts", () => {
   test.beforeEach(async ({ page }) => { await A.boot(page, { scheme: "plant-conservation" }); });
 
   test("the + button with nothing selected creates a visible top concept", async ({ page }) => {
@@ -31,20 +31,20 @@ test.describe("Creating concepts (FR-1.3)", () => {
   });
 
   test("the + button with a concept selected pre-fills that concept as broader", async ({ page }) => {
-    await A.clickRow(page, A.sdg("recursos-naturales"));
+    await A.clickRow(page, A.sdg("natural-resources"));
     await page.click("#btnNewConcept");
     await A.waitModal(page, "New concept");
-    expect(await A.pickerValue(page, "mBroader")).toBe(A.sdg("recursos-naturales"));
+    expect(await A.pickerValue(page, "mBroader")).toBe(A.sdg("natural-resources"));
     await page.fill("#mText", "Mineral resources");
     await A.modalOk(page);
 
     const c = await created(page, "Mineral resources");
-    expect(await A.broaderOf(page, c)).toEqual([A.sdg("recursos-naturales")]);
+    expect(await A.broaderOf(page, c)).toEqual([A.sdg("natural-resources")]);
     expect(await A.treeHas(page, c)).toBe(true);
   });
 
   test("right-click → New narrower concept puts the child under that concept, visibly", async ({ page }) => {
-    const parent = A.sdg("agua-dulce");          // Freshwater
+    const parent = A.sdg("freshwater");          // Freshwater
     // start from a collapsed parent — the child still has to end up on screen
     if (await A.isExpanded(page, parent)) await A.toggle(page, parent);
 
@@ -63,19 +63,19 @@ test.describe("Creating concepts (FR-1.3)", () => {
   });
 
   test("right-click → New sibling concept shares the parent", async ({ page }) => {
-    const sib = A.sdg("manglar");                 // Mangrove, child of Forests
+    const sib = A.sdg("mangrove");                 // Mangrove, child of Forests
     await A.reveal(page, sib);
     await A.rightClick(page, sib);
     await A.clickMenu(page, "sib");
     await A.fillNewConcept(page, { label: "Cloud forest" });
 
     const c = await created(page, "Cloud forest");
-    expect(await A.broaderOf(page, c)).toEqual([A.sdg("bosques")]);
+    expect(await A.broaderOf(page, c)).toEqual([A.sdg("forests")]);
     expect(await A.treeHas(page, c)).toBe(true);
   });
 
   test("a new sibling of a top concept is itself a top concept", async ({ page }) => {
-    await A.rightClick(page, A.sdg("recursos-naturales"));
+    await A.rightClick(page, A.sdg("natural-resources"));
     await A.clickMenu(page, "sib");
     await A.fillNewConcept(page, { label: "Ocean governance" });
 
@@ -85,7 +85,7 @@ test.describe("Creating concepts (FR-1.3)", () => {
   });
 
   test("clearing the pre-filled broader picker produces a top concept", async ({ page }) => {
-    await A.rightClick(page, A.sdg("agua-dulce"));
+    await A.rightClick(page, A.sdg("freshwater"));
     await A.clickMenu(page, "child");
     await A.fillNewConcept(page, { label: "Standalone term", broader: null });
 
@@ -95,7 +95,7 @@ test.describe("Creating concepts (FR-1.3)", () => {
   });
 
   test("a created concept carries the full set of triples, and exactly one placement", async ({ page }) => {
-    await A.clickRow(page, A.sdg("bosques"));
+    await A.clickRow(page, A.sdg("forests"));
     await page.click("#btnNewConcept");
     await A.fillNewConcept(page, { label: "Riparian forest" });
 
@@ -110,7 +110,7 @@ test.describe("Creating concepts (FR-1.3)", () => {
     expect(preds).toContain(SKOS + "broader");
     // a concept under a parent must not also claim to be a top concept
     expect(preds).not.toContain(SKOS + "topConceptOf");
-    expect(await A.narrowerOf(page, A.sdg("bosques"))).toContain(c);
+    expect(await A.narrowerOf(page, A.sdg("forests"))).toContain(c);
   });
 
   test("a top concept declares topConceptOf and has no broader", async ({ page }) => {
@@ -136,7 +136,7 @@ test.describe("Creating concepts (FR-1.3)", () => {
     const before = await A.quadCount(page);
     await page.click("#btnNewConcept");
     await A.waitModal(page, "New concept");
-    await page.fill("#mText", "Bosques");           // slugifies onto the existing concept
+    await page.fill("#mText", "Forests");           // slugifies onto the existing concept
     await A.modalOk(page);
     expect((await A.alerts(page)).join(" ")).toMatch(/collision|already/i);
     expect(await A.modalOpen(page)).toBe(true);     // the dialog stays open to be corrected
