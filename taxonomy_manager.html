@@ -1086,7 +1086,7 @@ body.ctx-collapsed .rail { display: flex; }
 <!-- ============================ CONNECT ============================ -->
 <div id="connect">
   <div class="connect-card">
-    <h1>Taxonomy Manager</h1>
+    <h1>Taxonomy &amp; Ontology Manager</h1>
     <p class="sub">Sign in with the database credentials you already use. Everything you read and
       write happens as you, under the permissions you already have.</p>
 
@@ -1138,7 +1138,7 @@ body.ctx-collapsed .rail { display: flex; }
     </div>
     <div class="brand" id="brandConn" title="Connection status — click to manage">
       <button class="conn-dot mock" id="connDot" aria-label="Connection status"></button>
-      <span>Taxonomy Manager</span>
+      <span>Taxonomy &amp; Ontology Manager</span>
     </div>
     <div class="sep"></div>
     <div class="selector" id="selDb"     title="Database"><span class="k">db</span><span class="v">—</span></div>
@@ -2419,7 +2419,7 @@ const Diag = {
     const clock = (d) => pad(d.getHours(), 2) + ":" + pad(d.getMinutes(), 2) + ":" +
                          pad(d.getSeconds(), 2) + "." + pad(d.getMilliseconds(), 3);
     const L = [];
-    L.push("Taxonomy Manager " + APP_VERSION + " — connection diagnostics");
+    L.push("Taxonomy & Ontology Manager " + APP_VERSION + " — connection diagnostics");
     L.push("generated  " + new Date().toISOString());
     L.push("page       " + location.href.replace(/[^/]*$/, "") + "  (origin " + location.origin + ")");
     L.push("browser    " + navigator.userAgent);
@@ -19219,7 +19219,7 @@ function openHelp(startId) {
 
   openModal({
     title: "Help",
-    sub: `Taxonomy Manager ${APP_VERSION}`,
+    sub: `Taxonomy & Ontology Manager ${APP_VERSION}`,
     body: `<div class="help-tour-cta">
         <button class="btn sm" id="helpTourBtn" type="button">Take a guided tour</button>
         <span class="muted" style="font-size:12px">See the same topics in the real interface, one step at a time.</span>
@@ -19248,7 +19248,7 @@ function openHelp(startId) {
 
 function openAbout() {
   openModal({
-    title: "Taxonomy Manager",
+    title: "Taxonomy & Ontology Manager",
     sub: `Version ${APP_VERSION}`,
     body: `<p style="margin:0 0 12px">A SKOS vocabulary editor that runs entirely in this browser and
       keeps everything in your graph database. There is no middle tier: every read and write is a
